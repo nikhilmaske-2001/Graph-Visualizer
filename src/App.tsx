@@ -23,14 +23,13 @@ function App() {
   React.useEffect(() => {
     if (!inputValue) return;
 
-    console.log("inpput value changed");
-    console.log(inputValue);
-
-    // TODO: Error handling
-    const parsedValue = ParseUtils.parsePairs(inputValue);
-
-    console.log("parsed value: ");
-    console.log(parsedValue);
+    let parsedValue: any;
+    try {
+      parsedValue = ParseUtils.parsePairs(inputValue);
+    } catch (error) {
+      console.log(error);
+      return;
+    }
 
     const tempNodes: Array<any> = [];
 
@@ -40,8 +39,8 @@ function App() {
       tempNodes.push({ id: nodeId, x: x, y: y});
     }
 
-    parsedValue.nodes = tempNodes;
     console.log(parsedValue);
+    parsedValue.nodes = tempNodes;
     setData(parsedValue);
   }, [inputValue]);
 
