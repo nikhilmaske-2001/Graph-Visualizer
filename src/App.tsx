@@ -34,8 +34,8 @@ function App() {
     const tempNodes: Array<any> = [];
 
     for(let nodeId of Array.from(parsedValue.nodeSet)) {
-      let x = Utils.randomInRange(10, 800);
-      let y = Utils.randomInRange(10, 600);
+      let x = Utils.randomInRange(10, 400);
+      let y = Utils.randomInRange(10, 300);
       tempNodes.push({ id: nodeId, x: x, y: y});
     }
 
