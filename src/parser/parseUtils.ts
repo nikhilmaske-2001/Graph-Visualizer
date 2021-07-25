@@ -14,7 +14,7 @@ export function parsePairs(input: string, directed = true): any {
     while(nextOpenBracket !== -1) {
       const nextCloseBracket = input.indexOf("]", nextOpenBracket);
       const pair = getDirectedPair(
-        input.slice(nextOpenBracket+1, nextOpenBracket),
+        input.slice(nextOpenBracket+1, nextCloseBracket),
         nodeSet
       );
       links.push(pair);
