@@ -31,7 +31,7 @@ export function parsePairs(config: {
   directed?: boolean;
   weighted?: boolean;
 }): any {
-    let {input, directed, weighted} = config;
+    let {input, directed = true, weighted = true} = config;
     // trim whitespace
     // TODO: Error handling
     input = input.trim();
@@ -50,7 +50,8 @@ export function parsePairs(config: {
       try {
         const pair = getDirectedPair(
           input.slice(nextOpenBracket+1, nextCloseBracket),
-          nodeSet
+          nodeSet,
+          weighted
         );
         links.push(pair);
       } catch (error) {
@@ -66,11 +67,11 @@ export function parsePairs(config: {
     return {nodeSet: nodeSet, links: links};
   }
 
-function getDirectedPair(s: string, nodeSet: Set<string>) {
+function getDirectedPair(s: string, nodeSet: Set<string>, weighted: boolean) {
   s = s.trim();
 
   if(s.length === 0 || s.indexOf(",") === -1) 
-    throw new Error("Pair needs two arguments");
+    throw new Error("Pair needs at least two arguments");
 
   const sp = s.split(",");
   const src = sp[0].trim();
@@ -82,7 +83,11 @@ function getDirectedPair(s: string, nodeSet: Set<string>) {
   nodeSet.add(src);
   nodeSet.add(trg);
 
-  return { source: src, target: trg};
+  const rtn: any = {source: src, target: trg};
+  if(weighted && sp.length === 3) {
+    rtn.label = sp[2].trim();
+  }
+  return rtn;
 }
   
   // adjacency list
