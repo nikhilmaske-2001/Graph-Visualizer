@@ -13,12 +13,8 @@ export function processInput(input: string, type: number): any {
       return parseAdjacencyList(config);
     case InputType.AdjacencyMatrix:
       return "Adjacency Matrix";
-    case InputType.BinaryTree:
-      return "Binary Tree";
     case InputType.GraphObject:
       return "Graph Object";
-    case InputType.TreeObject:
-      return "Ancestor Graph";
     default:
       break;
   }
