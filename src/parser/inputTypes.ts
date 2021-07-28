@@ -6,7 +6,7 @@ export enum InputType {
     AdjacencyMatrix,
     BinaryTree,
     GraphObject,
-    AncestorGraph
+    TreeObject
   }
   
   export function getLabel(type: number) {
@@ -22,11 +22,11 @@ export enum InputType {
       case InputType.AdjacencyMatrix:
         return "Adjacency Matrix";
       case InputType.BinaryTree:
-        return "Binary Tree";
+        return "Binary Tree or Heap";
       case InputType.GraphObject:
         return "Graph Object";
-      case InputType.AncestorGraph:
-        return "Ancestor Graph";
+      case InputType.TreeObject:
+        return "Tree JSON";
       default:
         return "Error Label";
     }

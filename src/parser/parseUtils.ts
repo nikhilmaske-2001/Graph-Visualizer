@@ -17,7 +17,7 @@ export function processInput(input: string, type: number): any {
       return "Binary Tree";
     case InputType.GraphObject:
       return "Graph Object";
-    case InputType.AncestorGraph:
+    case InputType.TreeObject:
       return "Ancestor Graph";
     default:
       break;
@@ -31,7 +31,7 @@ export function parsePairs(config: {
   directed?: boolean;
   weighted?: boolean;
 }): any {
-    let {input, directed = true, weighted = true} = config;
+    let {input, weighted = true} = config;
     // trim whitespace
     // TODO: Error handling
     input = input.trim();
@@ -97,7 +97,7 @@ function getDirectedPair(s: string, nodeSet: Set<string>, weighted: boolean) {
     directed?: boolean;
     oneIndexed?: boolean;
   }): any {
-    let { input, directed, oneIndexed } = config;
+    let { input, oneIndexed } = config;
   
     // trim whitespace
     input = input.trim();
@@ -153,3 +153,31 @@ function parseArray(s: string, nodeSet: Set<string>): any[] {
 }
 // adjacency matrix
 // n x n binary matrix where arr[i][j] means there is a connection between i and j
+export function parseAdjacencyMatrix(config: { input: string }): any {
+  let { input } = config;
+  input = input.trim();
+  if (input.length < 2) throw new Error("Input too short");
+  input = input.slice(1, input.length - 1);
+
+  // TODO: parse each row of the matrix and add a connection between row i and column j when 1 is encountered
+}
+
+export function parseNodes(input: string) {
+  const nodeSet = new Set<string>();
+  input = input.trim();
+  if (input.length < 2) {
+    console.error("Input too short");
+    return nodeSet;
+  }
+  input = input.slice(1, input.length - 1);
+  if (input.length === 0 || input.indexOf(",") === -1) {
+    console.error("Input too short");
+    return nodeSet;
+  }
+  const sp = input.split(",");
+  for (let s of sp) {
+    s = s.trim();
+    if (s.length) nodeSet.add(s);
+  }
+  return nodeSet;
+}

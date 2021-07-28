@@ -6,7 +6,6 @@ import * as Utils from "./utils/utils";
 import {InputType, getLabel} from "./parser/inputTypes";
 
 // TODO: Add ability to specify own nodes
-// TODO: ability to set directed/undirected
 
 function App() {
   const [inputValue, setInputValue] = React.useState("");
@@ -107,6 +106,8 @@ function App() {
       <Graph
         id="graph-id" // id is mandatory, if no id is defined rd3g will throw an error
         inputType = {comboValue}
+        directed = {directed}
+        customNodes = {customNodes}
         data={data}
       />
     </>
