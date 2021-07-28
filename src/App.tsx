@@ -3,7 +3,7 @@ import "./App.css";
 import Graph from "./graph/Graph";
 import * as ParseUtils from "./parser/parseUtils";
 import * as Utils from "./utils/utils";
-import {InputType, getLabel, getTypeConfig} from "./parser/inputTypes";
+import {InputType, getLabel} from "./parser/inputTypes";
 
 // TODO: Add ability to specify own nodes
 // TODO: ability to set directed/undirected
@@ -11,6 +11,8 @@ import {InputType, getLabel, getTypeConfig} from "./parser/inputTypes";
 function App() {
   const [inputValue, setInputValue] = React.useState("");
   const [comboValue, setComboValue] = React.useState(0);
+  const [directed, setDirected] = React.useState(true);
+  const [customNodes, setCustomNodes] = React.useState("");
 
   // graph payload (with minimalist structure)
   const [data, setData] = React.useState({
@@ -63,9 +65,21 @@ function App() {
           {Object.keys(InputType)
             .filter(k => typeof InputType[k as any] !== "number")
             .map(key => (
-              <option value= {key}>{getLabel(parseInt(key))}</option>
+              <option key = {key} value= {key}>
+                {getLabel(parseInt(key))}
+              </option>
             ))}
         </select>
+        <br/>
+        <label>
+          Directed: {" "}
+          <input
+            type = "checkbox"
+            value = {"directedValue"}
+            checked = {directed}
+            onChange ={e => setDirected(!directed)}
+            />
+        </label>
         <br/>
         <label>
           Graph Input:
@@ -75,6 +89,17 @@ function App() {
             value={inputValue}
             onChange={(event) => {
               setInputValue(event.target.value);
+            }}
+          />
+        </label>
+        <label>
+          Custom Nodes:
+          <textarea
+            id="custom-nodes"
+            name="custom-nodes"
+            value={customNodes}
+            onChange={(event) => {
+              setCustomNodes(event.target.value);
             }}
           />
         </label>
