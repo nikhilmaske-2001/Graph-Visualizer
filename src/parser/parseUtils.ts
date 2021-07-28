@@ -207,7 +207,15 @@ export function parseAdjacencyMatrix(config: { input: string }): any {
 export function parseGraphJSON(config: { input: string }) {
   let { input } = config;
   input = input.trim();
-  const jsonObj = parseJson(input); // parseJson library will automatically handle and throw error in syntax
+  let jsonObj: any;
+  try {
+    jsonObj = parseJson(input); // parseJson library will automatically handle and throw error in syntax
+  } catch (error) {
+    throw new Error(error.message);
+  }
+  if (!jsonObj.graph || !jsonObj.graph.nodes) {
+    throw new Error("JSON object is missing the `graph.nodes` property");
+  }
   let nodes = jsonObj.graph.nodes;
 
   const nodeSet = new Set<string>();
@@ -215,9 +223,11 @@ export function parseGraphJSON(config: { input: string }) {
 
   for (let node of nodes) {
     nodeSet.add(node.id);
-    let children = node.children;
-    for (let child of children) {
-      links.push({ source: node.id, target: child });
+    if (node.children) {
+      let children = node.children;
+      for (let child of children) {
+        links.push({ source: node.id, target: child });
+      }
     }
   }
 
@@ -228,7 +238,16 @@ export function parseGraphJSON(config: { input: string }) {
 export function parseBinaryTreeJSON(config: { input: string }) {
   let { input } = config;
   input = input.trim();
-  const jsonObj = parseJson(input); // parseJson library will automatically handle and throw error in syntax
+  let jsonObj: any;
+  try {
+    jsonObj = parseJson(input); // parseJson library will automatically handle and throw error in syntax
+  } catch (error) {
+    throw new Error(error.message);
+  }
+
+  if (!jsonObj.tree || !jsonObj.tree.nodes) {
+    throw new Error("JSON object is missing the `tree.nodes` property");
+  }
   let nodes = jsonObj.tree.nodes;
 
   const nodeSet = new Set<string>();
@@ -236,10 +255,10 @@ export function parseBinaryTreeJSON(config: { input: string }) {
 
   for (let node of nodes) {
     nodeSet.add(node.id);
-    if (node.left !== null) {
+    if (node.left) {
       links.push({ source: node.id, target: node.left });
     }
-    if (node.right !== null) {
+    if (node.right) {
       links.push({ source: node.id, target: node.right });
     }
   }
