@@ -34,7 +34,7 @@ export function parsePairs(config: {
     // trim whitespace
     // TODO: Error handling
     input = input.trim();
-    if(input.length < 2) throw new Error("Input too short");
+    if(input.length < 2) throw new Error("Please enter a non-empty input");
     input = input.slice(1, input.length - 1);
 
     const links= [];
@@ -44,7 +44,7 @@ export function parsePairs(config: {
     let nextOpenBracket = input.indexOf("[", startInd);
     while(nextOpenBracket !== -1) {
       const nextCloseBracket = input.indexOf("]", nextOpenBracket);
-      if(nextCloseBracket === -1) throw new Error("No matching closing bracket");
+      if(nextCloseBracket === -1) throw new Error("Missing a ']'");
 
       try {
         const pair = getDirectedPair(
@@ -70,14 +70,14 @@ function getDirectedPair(s: string, nodeSet: Set<string>, weighted: boolean) {
   s = s.trim();
 
   if(s.length === 0 || s.indexOf(",") === -1) 
-    throw new Error("Pair needs at least two arguments");
+    throw new Error("An edge pair has less than two arguments");
 
   const sp = s.split(",");
   const src = sp[0].trim();
   const trg = sp[1].trim();
 
   if(src.length === 0 || trg.length === 0) 
-    throw new Error("src and trg needs to be non-empty");
+    throw new Error("An edge pair has less than two arguments");
 
   nodeSet.add(src);
   nodeSet.add(trg);
@@ -100,7 +100,7 @@ function getDirectedPair(s: string, nodeSet: Set<string>, weighted: boolean) {
   
     // trim whitespace
     input = input.trim();
-    if(input.length < 2) throw new Error("Input too short");
+    if(input.length < 2) throw new Error("Please enter a non-empty input.");
     input = input.slice(1, input.length-1);
     
     const links = [];
@@ -111,7 +111,7 @@ function getDirectedPair(s: string, nodeSet: Set<string>, weighted: boolean) {
     let srcNode = oneIndexed ? 1 : 0; //index of source node
     while (nextOpenBracket !== -1) {
       const nextCloseBracket = input.indexOf("]", nextOpenBracket);
-      if (nextCloseBracket === -1) throw new Error("No matching close bracket");
+      if (nextCloseBracket === -1) throw new Error("Missing a ']'");
   
       const src = srcNode.toString();
       nodeSet.add(src);
