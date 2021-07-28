@@ -32,7 +32,8 @@ export enum InputType {
     }
   }
   
-  export function getTypeConfig(type: InputType) {
+  // Todo: Add ability to specify own nodes
+  export function getTypeConfig(type: InputType): any {
     const config = {
       inputType: type,
       weighted: false,
