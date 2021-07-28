@@ -4,10 +4,12 @@
   "private": true,
   "dependencies": {
     "@material-ui/core": "^4.12.2",
+    "@material-ui/icons": "^4.11.2",
     "@testing-library/jest-dom": "^5.14.1",
     "@testing-library/react": "^11.2.7",
     "@testing-library/user-event": "^12.8.3",
     "@types/react-d3-graph": "^2.6.1",
+    "clsx": "^1.1.1",
     "d3": "^5.16.0",
     "parse-json": "^5.2.0",
     "react": "^17.0.2",
