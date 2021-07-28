@@ -25,7 +25,7 @@ function App() {
 
     let parsedValue: any;
     try {
-      parsedValue = ParseUtils.parsePairs(inputValue);
+      parsedValue = ParseUtils.parseAdjacencyList(inputValue);
     } catch (error) {
       console.log(error);
       return;
@@ -46,7 +46,8 @@ function App() {
 
   return (
     <>
-    [[2,1][3,1],[1,4]]
+    [[2,1][3,1],[1,4]] <br/>
+    [[1],[],[0,5],[],[1,3,0],[0]]
       <form>
         <label>
           Graph Input:
