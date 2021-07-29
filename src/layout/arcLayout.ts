@@ -4,12 +4,13 @@ import * as Graph from "../graph/Graph";
 import { generatePermutations } from "../utils/utils";
 
 
-const DEFAULT_X_SPACING = 70;
 const DEFAULT_Y_PADDING = 120;
+
+const spacingArray = [50, 60, 75, 95, 125];
 
 const DEFAULT_MAX_LEN_TO_BRUTE_FORCE = 5;
 
-export function layoutArc(data: MyDataType) {
+export function layoutArc(data: MyDataType, spacing: { x: number; y: number }) {
   let { startNode, nodes, links } = data;
 
   const disconnectedComponents = LayoutUtils.getDisconnectedComponents(nodes, links, startNode);
@@ -45,11 +46,11 @@ export function layoutArc(data: MyDataType) {
     }
 
     // assign positions to the sorted notes
-    let x_offset = Graph.DEFAULT_LEFT_PADDING;
+    let x_offset = Graph.DEFAULT_LEFT_PADDING / 2;
     for (let node of sortedNodes) {
       node.x = x_offset;
       node.y = y_value;
-      x_offset += DEFAULT_X_SPACING;
+      x_offset += spacingArray[spacing.x];
     }
     y_value += DEFAULT_Y_PADDING * 2;
   }

@@ -18,7 +18,8 @@ import {
   Typography,
   TextField,
   FormControlLabel,
-  Checkbox
+  Checkbox,
+  Slider
 } from "@material-ui/core";
 import { Autocomplete } from "@material-ui/lab";
 import CssBaseline from "@material-ui/core/CssBaseline";
@@ -28,30 +29,10 @@ import { LabelWithTooltip, ColorButton, SelectedButton } from "./utils/helperCom
 import { TreeNode } from "./layout/treeLayout";
 import SearchBar from "material-ui-search-bar";
 
-const DEFAULT_INPUT_TYPE = InputType.EdgePairs;
-const DEFAULT_LAYOUT_TYPE = LayoutType.Arc;
-const DEFAULT_GRAPH_INPUT = `[
-  ['DSM', 'ORD'],
-  ['ORD', 'BGI'],
-  ['BGI', 'LGA'],
-  ['SIN', 'CDG'],
-  ['CDG', 'SIN'],
-  ['CDG', 'BUD'],
-  ['DEL', 'DOH'],
-  ['DEL', 'CDG'],
-  ['TLV', 'DEL'],
-  ['EWR', 'HND'],
-  ['HND', 'ICN'],
-  ['HND', 'JFK'],
-  ['ICN', 'JFK'],
-  ['JFK', 'LGA'],
-  ['EYW', 'LHR'],
-  ['LHR', 'SFO'],
-  ['SFO', 'SAN'],
-  ['SFO', 'DSM'],
-  ['SAN', 'EYW']
-]`;
-const DEFAULT_CUSTOM_NODES_INPUT = "";
+const DEFAULT_INPUT_TYPE = InputType.AdjacencyList;
+const DEFAULT_LAYOUT_TYPE = LayoutType.Tree;
+const DEFAULT_GRAPH_INPUT = ``;
+const DEFAULT_CUSTOM_NODES_INPUT = "[]";
 
 export type MyGraphNodeType = { id: string; label: string; x?: number; y?: number };
 export type MyGraphLinkType = { source: string; target: string; label?: string };
@@ -87,13 +68,8 @@ function App() {
   // graph payload (with minimalist structure)
   const [customNodeSet, setCustomNodeSet] = React.useState(new Set<string>());
   const [data, setData] = React.useState<MyDataType>({
-    nodes: [
-      { id: "PlaceHolderNode1", label: "PlaceHolderNode1", x: 50, y: 50 },
-      { id: "PlaceHolderNode2", label: "PlaceHolderNode2", x: 100, y: 100 }
-    ],
-    links: [
-      { source: "PlaceHolderNode1", target: "PlaceHolderNode2", label: "TestLinkLabel" }
-    ]
+    nodes: [],
+    links: []
   });
 
   // layout
@@ -103,6 +79,10 @@ function App() {
 
   const graphInputRef = React.useRef<any>();
   const customNodesInputRef = React.useRef<any>();
+  const reverseRef = React.useRef(false);
+
+  const [verticalSlider, setVerticalSlider] = React.useState<number>(2);
+  const [horizontalSlider, setHorizontalSlider] = React.useState<number>(2);
 
   // handle changes to graph input, input type, associated options (i.e. 1-indexed)
   React.useEffect(() => {
@@ -124,6 +104,12 @@ function App() {
       return;
     }
 
+    let reverseChanged = false;
+    if (reverseEdges !== reverseRef.current) {
+      reverseChanged = true;
+      reverseRef.current = reverseEdges;
+    }
+
     const nodeToLabel = parsedValue.nodeToLabel ? parsedValue.nodeToLabel : {};
 
     parsedValue.nodes = Array.from(parsedValue.nodeSet).map(nodeId => {
@@ -135,7 +121,9 @@ function App() {
     if (parsedValue.startNode) {
       setStartNode(parsedValue.startNode);
     } else {
-      setStartNode(null);
+      if (!reverseChanged) {
+        setStartNode(null);
+      }
     }
 
     setGraphInputError("");
@@ -364,7 +352,7 @@ function App() {
               InputLabelProps={{ style: { pointerEvents: "auto" } }}
               label={
                 <LabelWithTooltip
-                  label={"Custom Node Set"}
+                  label={"Custom Node List"}
                   tooltipText={
                     "(Optional) Specify if the set of nodes is described in a separate list from the edges."
                   }
@@ -403,7 +391,49 @@ function App() {
           selectedLayout={selectedLayout}
           drawerOpen={drawerOpen}
           searchText={searchText}
+          horizontalSpacing={horizontalSlider}
+          verticalSpacing={verticalSlider}
         />
+        <div className={classes.sliders}>
+          {selectedLayout !== LayoutType.ForceLayout && selectedLayout !== LayoutType.Random && (
+            <>
+              <Typography id="continuous-slider" gutterBottom>
+                Horizontal Spacing
+              </Typography>
+              <Slider
+                value={horizontalSlider}
+                onChange={(event, newValue) => {
+                  setHorizontalSlider(newValue as number);
+                }}
+                aria-labelledby="discrete-slider"
+                step={1}
+                marks
+                min={0}
+                max={4}
+              />
+            </>
+          )}
+          {selectedLayout !== LayoutType.ForceLayout &&
+            selectedLayout !== LayoutType.Random &&
+            selectedLayout !== LayoutType.Arc && (
+              <>
+                <Typography id="continuous-slider" gutterBottom>
+                  Vertical Spacing
+                </Typography>
+                <Slider
+                  value={verticalSlider}
+                  onChange={(event, newValue) => {
+                    setVerticalSlider(newValue as number);
+                  }}
+                  aria-labelledby="discrete-slider"
+                  step={1}
+                  marks
+                  min={0}
+                  max={4}
+                />
+              </>
+            )}
+        </div>
       </main>
     </div >
   );

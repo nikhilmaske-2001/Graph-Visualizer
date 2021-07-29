@@ -82,5 +82,16 @@ export const useStyles = makeStyles(theme => ({
   },
   selectEmpty: {
     marginTop: theme.spacing(2)
+  },
+
+  sliders: {
+    position: "absolute",
+    zIndex: 999,
+    top: 75,
+    right: 30,
+    height: 150
+  },
+  layoutError: {
+    marginRight: 150
   }
 }));

@@ -1,13 +1,15 @@
 import { InputType } from "../parser/inputTypes";
 import { layoutTree } from "./treeLayout";
 import { layoutArc } from "./arcLayout";
+import { layoutTopoSort } from "./topologicalSort";
 import { MyDataType } from "../App";
 
 export enum LayoutType {
   Tree,
   ForceLayout,
   TopologicalSort,
-  Arc
+  Arc,
+  Random
 }
 
 export function getLayoutLabel(type: number) {
@@ -20,6 +22,8 @@ export function getLayoutLabel(type: number) {
       return "Topological Sort";
     case LayoutType.Arc:
       return "Arc";
+    case LayoutType.Random:
+      return "Random";
     default:
       return "Error Label";
   }
@@ -31,6 +35,7 @@ export function getDefaultLayout({ inputType, data, directed, customNodes, start
     case InputType.WeightedEdgePairs:
     case InputType.AdjacencyList:
     case InputType.AdjacencyMatrix:
+      return LayoutType.Arc;
     case InputType.GraphObject:
       return LayoutType.ForceLayout;
     case InputType.BinaryTreeObject:
@@ -42,13 +47,23 @@ export function getDefaultLayout({ inputType, data, directed, customNodes, start
   }
 }
 
-export function performLayout(layoutType: number, data: MyDataType, inputType: number) {
+export function performLayout(
+  layoutType: number,
+  data: MyDataType,
+  inputType: number,
+  spacing: { x: number; y: number }
+) {
   switch (layoutType) {
     case LayoutType.Tree:
-      return layoutTree(data, inputType);
+      return layoutTree(data, inputType, spacing);
+    case LayoutType.TopologicalSort:
+      return layoutTopoSort(data, spacing);
     case LayoutType.Arc:
-      return layoutArc(data);
+      return layoutArc(data, spacing);
     case LayoutType.ForceLayout:
+      // Handled within Graph.tsx
+      return;
+    case LayoutType.Random:
       // Handled within Graph.tsx
       return;
     default:
