@@ -21,6 +21,8 @@ export type GraphProps = {
   selectedLayout: number;
   drawerOpen: boolean;
   searchText: string;
+  horizontalSpacing: number;
+  verticalSpacing: number;
 };
 
 function debounce(fn: any, ms: number) {
@@ -43,7 +45,9 @@ const Graph = ({
   startNode,
   selectedLayout,
   drawerOpen,
-  searchText
+  searchText,
+  horizontalSpacing,
+  verticalSpacing
 }: GraphProps) => {
   // the graph configuration, you only need to pass down properties
   // that you want to override, otherwise default ones will be used
@@ -84,7 +88,7 @@ const Graph = ({
       }
     }
     setOldToNewId(currIdMap);
-  }, [data, customNodes, selectedLayout, startNode]);
+  }, [data, customNodes, selectedLayout, startNode, horizontalSpacing, verticalSpacing]);
 
 
   const graphPaneHeight = dimensions.height - 120;
@@ -131,7 +135,10 @@ const Graph = ({
   data.startNode = startNode;
   data.directed = directed;
 
-  const layoutResult = performLayout(selectedLayout, data, inputType);
+  const layoutResult = performLayout(selectedLayout, data, inputType, {
+    x: horizontalSpacing,
+    y: verticalSpacing
+  });
   if (typeof layoutResult === "string") {
     return (
       <Typography color="secondary" variant="h6">
