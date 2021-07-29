@@ -6,7 +6,6 @@ export enum LayoutType {
   Tree,
   ForceLayout,
   TopologicalSort,
-  ForceLayout
 }
 
 export function getLayoutLabel(type: number) {

@@ -19,6 +19,7 @@ export type GraphProps = {
   startNode: string | null;
   selectedLayout: number;
   drawerOpen: boolean;
+  searchText: string;
 };
 
 function debounce(fn: any, ms: number) {
@@ -40,7 +41,8 @@ const Graph = ({
   customNodes,
   startNode,
   selectedLayout,
-  drawerOpen
+  drawerOpen,
+  searchText
 }: GraphProps) => {
   // the graph configuration, you only need to pass down properties
   // that you want to override, otherwise default ones will be used
@@ -48,6 +50,8 @@ const Graph = ({
     height: window.innerHeight,
     width: window.innerWidth
   });
+
+  const [oldToNewId, setOldToNewId] = React.useState<{ [key: string]: string }>({});
 
   React.useEffect(() => {
     const debouncedHandleResize = debounce(function handleResize() {
@@ -58,6 +62,29 @@ const Graph = ({
     }, 100);
     window.addEventListener("resize", debouncedHandleResize);
   });
+
+  // every time node set changes, we need to check to see if there are any conflicts in node ids
+  React.useEffect(() => {
+    const allIds = new Set<string>(Object.values(oldToNewId));
+    const currIdMap: { [key: string]: string } = {};
+    for (let node of data.nodes) {
+      let nodeId = node.id;
+      if (allIds.has(nodeId)) {
+        currIdMap[nodeId] = nodeId + "-1"; // add a 1 if there is a conflict
+      } else {
+        currIdMap[nodeId] = nodeId;
+      }
+    }
+    for (let nodeId of Array.from(customNodes)) {
+      if (allIds.has(nodeId)) {
+        currIdMap[nodeId] = nodeId + "-1";
+      } else {
+        currIdMap[nodeId] = nodeId;
+      }
+    }
+    setOldToNewId(currIdMap);
+  }, [data.nodes, customNodes]);
+
 
   const graphPaneHeight = dimensions.height - 120;
   const graphPaneWidth = drawerOpen ? dimensions.width - 350 : dimensions.width - 50;
@@ -114,7 +141,8 @@ const Graph = ({
     link: {
       color: "blue",
       renderLabel: getTypeConfig(inputType).weighted
-    }
+    },
+    focusZoom: 1
   };
 
   // graph event callbacks
@@ -166,31 +194,42 @@ const Graph = ({
     window.alert(`Node ${nodeId} is moved to new position. New position is x= ${x} y= ${y}`);
   };
 
-  const oldNodeToNewNodeId: any = {};
   const argNodes = [];
   const argLinks = [];
+  let focusId: string | undefined;
   for (let node of [...data.nodes, ...extraNodes]) {
-    let rand = Math.floor(Math.random() * 100000000).toString();
     let nodeId = node.id;
-    let newId = nodeId + rand;
-    oldNodeToNewNodeId[nodeId] = newId;
-
-    argNodes.push({ ...node, id: newId });
+    if (node.label === searchText) {
+      focusId = nodeId;
+      argNodes.push({
+        ...node,
+        id: oldToNewId[nodeId] || nodeId,
+        color: "red",
+        fontColor: "white"
+      });
+    } else {
+      argNodes.push({ ...node, id: oldToNewId[nodeId] || nodeId });
+    }
   }
 
   for (let link of data.links) {
     argLinks.push({
       ...link,
-      source: oldNodeToNewNodeId[link.source],
-      target: oldNodeToNewNodeId[link.target]
+      source: oldToNewId[link.source] || link.source,
+      target: oldToNewId[link.target] || link.target
     });
   }
+
 
 
   return (
     <D3Graph
       id="graph-id" // id is mandatory, if no id is defined rd3g will throw an error
-      data={{ nodes: argNodes, links: argLinks }}
+      data={{
+        nodes: argNodes,
+        links: argLinks,
+        focusedNodeId: focusId ? oldToNewId[focusId] : undefined
+      }}
       config={myConfig}
       // onClickNode={onClickNode}
       // onDoubleClickNode={onDoubleClickNode}
