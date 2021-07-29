@@ -29,11 +29,7 @@ export function processInput(input: string, type: number, options?: any): any {
 
 // directed pairs
 // [[2,1],[3,1],[1,4]]
-export function parsePairs(config: {
-  input: string;
-  directed?: boolean;
-  weighted?: boolean;
-}): any {
+export function parsePairs(config: { input: string; directed?: boolean; weighted?: boolean }): any {
     let {input, weighted = true} = config;
     // trim whitespace
     // TODO: Error handling
@@ -121,9 +117,7 @@ function getDirectedPair(s: string, nodeSet: Set<string>, weighted: boolean) {
       nodeSet.add(src);
   
       try {
-        const arr = parseArray(
-          input.slice(nextOpenBracket + 1, nextCloseBracket)
-        );
+        const arr = parseArray(input.slice(nextOpenBracket + 1, nextCloseBracket));
         for (let trg of arr) {
           links.push({ source: src, target: trg });
         }
@@ -177,10 +171,7 @@ export function parseAdjacencyMatrix(config: { input: string }): any {
     nodeSet.add(src);
 
     try {
-      const arr = parseArray(
-        input.slice(nextOpenBracket + 1, nextCloseBracket)
-      );
-      matrix.push(arr);
+      const arr = parseArray(input.slice(nextOpenBracket + 1, nextCloseBracket));
     } catch (ex) {
       throw ex;
     }
@@ -193,8 +184,7 @@ export function parseAdjacencyMatrix(config: { input: string }): any {
   const n = matrix.length;
   for (let i = 0; i < matrix.length; i++) {
     const arr = matrix[i];
-    if (arr.length !== n)
-      throw new Error("adjacency matrix has incorrect column size(s)");
+    if (arr.length !== n) throw new Error("Adjacency matrix has incorrect column size(s)");
     for (let j = 0; j < n; j++) {
       const colVal = arr[j];
       const colValNum = parseInt(colVal);

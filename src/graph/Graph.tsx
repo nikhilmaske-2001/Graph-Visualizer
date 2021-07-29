@@ -16,10 +16,10 @@ const Graph = ({ inputType, data, id = "graph-id", directed, customNodes }: Grap
   // the graph configuration, you only need to pass down properties
   // that you want to override, otherwise default ones will be used
 
-  if(customNodes && customNodes.length > 0) {
+  if (customNodes && customNodes.length > 0) {
     const nodeSet = parseNodes(customNodes);
-    if(nodeSet.size > 0) {
-      for(let n of data.nodes) {
+    if (nodeSet.size > 0) {
+      for (let n of data.nodes) {
         nodeSet.add(n.id);
       }
       const tempNodes = [];
@@ -94,10 +94,8 @@ const Graph = ({ inputType, data, id = "graph-id", directed, customNodes }: Grap
   //   window.alert(`Mouse out link between ${source} and ${target}`);
   // };
 
-  const onNodePositionChange = function(nodeId: string, x: number, y: number) {
-    window.alert(
-      `Node ${nodeId} is moved to new position. New position is x= ${x} y= ${y}`
-    );
+  const onNodePositionChange = function (nodeId: string, x: number, y: number) {
+    window.alert(`Node ${nodeId} is moved to new position. New position is x= ${x} y= ${y}`);
   };
 
   return (
