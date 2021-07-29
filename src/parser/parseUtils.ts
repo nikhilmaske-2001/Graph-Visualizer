@@ -119,7 +119,11 @@ function getDirectedPair(s: string, nodeSet: Set<string>, weighted: boolean) {
       try {
         const arr = parseArray(input.slice(nextOpenBracket + 1, nextCloseBracket));
         for (let trg of arr) {
+          nodeSet.add(trg); // add target to nodeSet too
+        if (src !== trg) {
+          //TODO: should we handle self-links?
           links.push({ source: src, target: trg });
+        }
         }
       } catch (ex) {
         throw ex;
