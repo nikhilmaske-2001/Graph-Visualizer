@@ -86,8 +86,8 @@ function App() {
         label: nodeToLabel.hasOwnProperty(nodeId) ? nodeToLabel[nodeId as string] : nodeId
       };
     });
-    if (parsedValue.startValue) {
-      setStartNode(parsedValue.startValue);
+    if (parsedValue.startNode) {
+      setStartNode(parsedValue.startNode);
     }
 
     setGraphInputError("");

@@ -31,6 +31,15 @@ export function processInput(input: string, type: number, options?: any): any {
   }
 }
 
+// trim whitespace and remove quotes
+function cleanseInput(s: string) {
+  s = s.trim();
+  if (s.length && s.charAt(0) === `"` && s.charAt(s.length - 1) === `"`) {
+    s = s.slice(1, s.length - 1);
+  }
+  return s;
+}
+
 // directed pairs
 // [[2,1],[3,1],[1,4]]
 export function parsePairs(config: { input: string; directed?: boolean; weighted?: boolean }): any {
@@ -77,8 +86,8 @@ function getDirectedPair(s: string, nodeSet: Set<string>, weighted: boolean) {
     throw new Error("An edge pair has less than two arguments");
 
   const sp = s.split(",");
-  const src = sp[0].trim();
-  const trg = sp[1].trim();
+  const src = cleanseInput(sp[0]);
+  const trg = cleanseInput(sp[1]);
 
   if(src.length === 0 || trg.length === 0) 
     throw new Error("An edge pair has less than two arguments");
@@ -275,6 +284,7 @@ export function parseBinaryHeap(config: { input: string }) {
     throw new Error("Input too short");
   }
   input = input.slice(1, input.length - 1);
+  input = input.trim();
   if (input.length === 0) {
     throw new Error("Input too short");
   }
@@ -283,20 +293,24 @@ export function parseBinaryHeap(config: { input: string }) {
   const links: Array<any> = [];
   if (input.indexOf(",") === -1) {
     nodeSet.add(input);
-    return { nodeSet: nodeSet, links: links };
+    return { startNode: input, nodeSet: nodeSet, links: links };
   }
 
   let sp = input.split(",");
   sp = sp.map((elem, ind) => {
-    let trimmed = elem.trim();
+    let trimmed = cleanseInput(elem);
     let key = ind + " index";
     nodeToLabel[key] = trimmed;
     nodeSet.add(key);
     return key;
   });
+  let root: string | undefined;
   for (let i = 0; i < sp.length; i++) {
     const src = sp[i];
     nodeSet.add(src);
+    if (i === 0) {
+      root = src;
+    }
 
     let leftChildInd = i * 2 + 1;
     let rightChildInd = i * 2 + 2;
@@ -307,7 +321,7 @@ export function parseBinaryHeap(config: { input: string }) {
       links.push({ source: src, target: rightChildInd + " index" });
     }
   }
-  return { nodeSet: nodeSet, nodeToLabel: nodeToLabel, links: links };
+  return { startNode: root, nodeSet: nodeSet, nodeToLabel: nodeToLabel, links: links };
 }
 
 // Leetcode's binary tree serialization
@@ -320,6 +334,7 @@ export function parseLeetcodeTree(config: { input: string }) {
     throw new Error("Input too short");
   }
   input = input.slice(1, input.length - 1);
+  input = input.trim();
   if (input.length === 0) {
     throw new Error("Input too short");
   }
@@ -330,12 +345,12 @@ export function parseLeetcodeTree(config: { input: string }) {
 
   if (input.indexOf(",") === -1) {
     nodeSet.add(input);
-    return { nodeSet: nodeSet, links: links };
+    return { startNode: input, nodeSet: nodeSet, links: links };
   }
 
   let sp = input.split(",");
   sp = sp.map((elem, ind) => {
-    let trimmed = elem.trim();
+    let trimmed = cleanseInput(elem);
     let key = ind + " index";
     if (trimmed !== "null") {
       nodeSet.add(key);
@@ -368,7 +383,7 @@ export function parseLeetcodeTree(config: { input: string }) {
     ind++;
   }
 
-  return { nodeSet: nodeSet, nodeToLabel: nodeToLabel, links: links };
+  return { startNode: "0 index", nodeSet: nodeSet, nodeToLabel: nodeToLabel, links: links };
 }
 
 export function parseNodes(input: string) {
@@ -378,16 +393,17 @@ export function parseNodes(input: string) {
     throw new Error("Input too short");
   }
   input = input.slice(1, input.length - 1);
+  input = input.trim();
   if (input.length === 0) {
     return nodeSet;
   }
   if (input.indexOf(",") === -1) {
-    nodeSet.add(input);
+    nodeSet.add(cleanseInput(input));
     return nodeSet;
   }
   const sp = input.split(",");
   for (let s of sp) {
-    s = s.trim();
+    s = cleanseInput(s);
     if (s.length) nodeSet.add(s);
   }
   return nodeSet;
