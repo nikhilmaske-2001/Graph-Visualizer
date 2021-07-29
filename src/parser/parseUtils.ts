@@ -156,7 +156,7 @@ export function parseAdjacencyMatrix(config: { input: string }): any {
   input = input.slice(1, input.length - 1);
 
   // TODO: parse each row of the matrix and add a connection between row i and column j when 1 is encountered
-  const matrix = [];
+  const matrix: string | any[] = [];
   const links = [];
   const nodeSet = new Set<string>();
 
