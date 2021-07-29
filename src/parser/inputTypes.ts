@@ -2,10 +2,11 @@ export enum InputType {
     EdgePairs,
     WeightedEdgePairs,
     AdjacencyList,
-    AdjacencyList1Ind,
     AdjacencyMatrix,
     GraphObject,
-    BinaryTreeObject
+    BinaryTreeObject,
+    BinaryHeap,
+    LeetcodeTree
   }
   
   export function getLabel(type: number) {
@@ -13,17 +14,19 @@ export enum InputType {
       case InputType.EdgePairs:
         return "Edge Pairs";
       case InputType.WeightedEdgePairs:
-        return "Weighted Edge Pairs";
+        return "Edge Pairs w/ Weights";
       case InputType.AdjacencyList:
         return "Adjacency List";
-      case InputType.AdjacencyList1Ind:
-        return "One-indexed Adjacency List";
       case InputType.AdjacencyMatrix:
         return "Adjacency Matrix";
       case InputType.GraphObject:
-        return "Graph Object";
+        return "JSON (Graph)";
       case InputType.BinaryTreeObject:
-        return "Binary Tree JSON";
+        return "JSON (Binary Tree)";
+    case InputType.BinaryHeap:
+      return "Array (Binary Heap)";
+    case InputType.LeetcodeTree:
+      return "Array (Leetcode Tree)";
       default:
         return "Error Label";
     }
@@ -39,9 +42,6 @@ export enum InputType {
     switch (type) {
       case InputType.WeightedEdgePairs:
         config.weighted = true;
-        break;
-      case InputType.AdjacencyList1Ind:
-        config.oneIndexed = true;
         break;
       default:
         break;

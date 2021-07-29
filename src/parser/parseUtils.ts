@@ -1,16 +1,20 @@
 import { InputType, getTypeConfig } from "./inputTypes";
 import parseJson from "parse-json";
 
-export function processInput(input: string, type: number): any {
+export function processInput(input: string, type: number, options?: any): any {
   const config = getTypeConfig(type);
   config.input = input;
+  if (options) {
+    if (options.oneIndexed) {
+      config.oneIndexed = true;
+    }
+  }
 
   switch (type) {
     case InputType.EdgePairs:
     case InputType.WeightedEdgePairs:
       return parsePairs(config);
     case InputType.AdjacencyList:
-    case InputType.AdjacencyList1Ind:
       return parseAdjacencyList(config);
     case InputType.AdjacencyMatrix:
       return parseAdjacencyMatrix(config);
@@ -18,18 +22,27 @@ export function processInput(input: string, type: number): any {
       return parseGraphJSON(config);
     case InputType.BinaryTreeObject:
       return parseBinaryTreeJSON(config);
+    case InputType.BinaryHeap:
+      return parseBinaryHeap(config);
+    case InputType.LeetcodeTree:
+      return parseLeetcodeTree(config);
     default:
       break;
   }
 }
 
+// trim whitespace and remove quotes
+function cleanseInput(s: string) {
+  s = s.trim();
+  if (s.length && s.charAt(0) === `"` && s.charAt(s.length - 1) === `"`) {
+    s = s.slice(1, s.length - 1);
+  }
+  return s;
+}
+
 // directed pairs
 // [[2,1],[3,1],[1,4]]
-export function parsePairs(config: {
-  input: string;
-  directed?: boolean;
-  weighted?: boolean;
-}): any {
+export function parsePairs(config: { input: string; directed?: boolean; weighted?: boolean }): any {
     let {input, weighted = true} = config;
     // trim whitespace
     // TODO: Error handling
@@ -73,8 +86,8 @@ function getDirectedPair(s: string, nodeSet: Set<string>, weighted: boolean) {
     throw new Error("An edge pair has less than two arguments");
 
   const sp = s.split(",");
-  const src = sp[0].trim();
-  const trg = sp[1].trim();
+  const src = cleanseInput(sp[0]);
+  const trg = cleanseInput(sp[1]);
 
   if(src.length === 0 || trg.length === 0) 
     throw new Error("An edge pair has less than two arguments");
@@ -117,11 +130,13 @@ function getDirectedPair(s: string, nodeSet: Set<string>, weighted: boolean) {
       nodeSet.add(src);
   
       try {
-        const arr = parseArray(
-          input.slice(nextOpenBracket + 1, nextCloseBracket)
-        );
+        const arr = parseArray(input.slice(nextOpenBracket + 1, nextCloseBracket));
         for (let trg of arr) {
+          nodeSet.add(trg); // add target to nodeSet too
+        if (src !== trg) {
+          //TODO: should we handle self-links?
           links.push({ source: src, target: trg });
+        }
         }
       } catch (ex) {
         throw ex;
@@ -158,7 +173,7 @@ export function parseAdjacencyMatrix(config: { input: string }): any {
   input = input.slice(1, input.length - 1);
 
   // TODO: parse each row of the matrix and add a connection between row i and column j when 1 is encountered
-  const matrix = [];
+  const matrix: string | any[] = [];
   const links = [];
   const nodeSet = new Set<string>();
 
@@ -173,10 +188,7 @@ export function parseAdjacencyMatrix(config: { input: string }): any {
     nodeSet.add(src);
 
     try {
-      const arr = parseArray(
-        input.slice(nextOpenBracket + 1, nextCloseBracket)
-      );
-      matrix.push(arr);
+      const arr = parseArray(input.slice(nextOpenBracket + 1, nextCloseBracket));
     } catch (ex) {
       throw ex;
     }
@@ -189,8 +201,7 @@ export function parseAdjacencyMatrix(config: { input: string }): any {
   const n = matrix.length;
   for (let i = 0; i < matrix.length; i++) {
     const arr = matrix[i];
-    if (arr.length !== n)
-      throw new Error("adjacency matrix has incorrect column size(s)");
+    if (arr.length !== n) throw new Error("Adjacency matrix has incorrect column size(s)");
     for (let j = 0; j < n; j++) {
       const colVal = arr[j];
       const colValNum = parseInt(colVal);
@@ -203,7 +214,6 @@ export function parseAdjacencyMatrix(config: { input: string }): any {
   return { nodeSet: nodeSet, links: links };
 }
 
-// TODO: Read start node (needed for layout)?
 export function parseGraphJSON(config: { input: string }) {
   let { input } = config;
   input = input.trim();
@@ -234,7 +244,6 @@ export function parseGraphJSON(config: { input: string }) {
   return { startNode: jsonObj.graph.startNode, nodeSet: nodeSet, links: links };
 }
 
-// TODO: Read root node (needed for layout)?
 export function parseBinaryTreeJSON(config: { input: string }) {
   let { input } = config;
   input = input.trim();
@@ -266,22 +275,135 @@ export function parseBinaryTreeJSON(config: { input: string }) {
   return { startNode: jsonObj.tree.root, nodeSet: nodeSet, links: links };
 }
 
+// Binary tree/heap in array form (child is at 2n+1 and 2n+2)
+// differentiate between id and label
+export function parseBinaryHeap(config: { input: string }) {
+  let { input } = config;
+  input = input.trim();
+  if (input.length < 2) {
+    throw new Error("Input too short");
+  }
+  input = input.slice(1, input.length - 1);
+  input = input.trim();
+  if (input.length === 0) {
+    throw new Error("Input too short");
+  }
+  const nodeSet = new Set<string>();
+  const nodeToLabel: any = {};
+  const links: Array<any> = [];
+  if (input.indexOf(",") === -1) {
+    nodeSet.add(input);
+    return { startNode: input, nodeSet: nodeSet, links: links };
+  }
+
+  let sp = input.split(",");
+  sp = sp.map((elem, ind) => {
+    let trimmed = cleanseInput(elem);
+    let key = ind + " index";
+    nodeToLabel[key] = trimmed;
+    nodeSet.add(key);
+    return key;
+  });
+  let root: string | undefined;
+  for (let i = 0; i < sp.length; i++) {
+    const src = sp[i];
+    nodeSet.add(src);
+    if (i === 0) {
+      root = src;
+    }
+
+    let leftChildInd = i * 2 + 1;
+    let rightChildInd = i * 2 + 2;
+    if (leftChildInd < sp.length) {
+      links.push({ source: src, target: leftChildInd + " index" });
+    }
+    if (rightChildInd < sp.length) {
+      links.push({ source: src, target: rightChildInd + " index" });
+    }
+  }
+  return { startNode: root, nodeSet: nodeSet, nodeToLabel: nodeToLabel, links: links };
+}
+
+// Leetcode's binary tree serialization
+// (modified bfs; see https://support.leetcode.com/hc/en-us/articles/360011883654-What-does-1-null-2-3-mean-in-binary-tree-representation-)
+// differentiate between id and label
+export function parseLeetcodeTree(config: { input: string }) {
+  let { input } = config;
+  input = input.trim();
+  if (input.length < 2) {
+    throw new Error("Input too short");
+  }
+  input = input.slice(1, input.length - 1);
+  input = input.trim();
+  if (input.length === 0) {
+    throw new Error("Input too short");
+  }
+
+  const nodeSet = new Set<string>();
+  const nodeToLabel: any = {};
+  const links: Array<any> = [];
+
+  if (input.indexOf(",") === -1) {
+    nodeSet.add(input);
+    return { startNode: input, nodeSet: nodeSet, links: links };
+  }
+
+  let sp = input.split(",");
+  sp = sp.map((elem, ind) => {
+    let trimmed = cleanseInput(elem);
+    let key = ind + " index";
+    if (trimmed !== "null") {
+      nodeSet.add(key);
+      nodeToLabel[key] = trimmed;
+    }
+    return elem.trim();
+  });
+
+  let queue = []; // queue.shift() to dequeue
+  queue.push("0 index");
+  let ind = 1;
+  while (queue.length > 0) {
+    let src = queue.shift();
+    if (ind >= sp.length) break;
+    let trg = sp[ind];
+    if (trg !== "null") {
+      // connect add to queue
+      trg = ind + " index";
+      links.push({ source: src, target: trg });
+      queue.push(trg);
+    }
+    ind++;
+    if (ind >= sp.length) break;
+    trg = sp[ind];
+    if (trg !== "null") {
+      trg = ind + " index";
+      links.push({ source: src, target: trg });
+      queue.push(trg);
+    }
+    ind++;
+  }
+
+  return { startNode: "0 index", nodeSet: nodeSet, nodeToLabel: nodeToLabel, links: links };
+}
 
 export function parseNodes(input: string) {
   const nodeSet = new Set<string>();
   input = input.trim();
   if (input.length < 2) {
-    console.error("Input too short");
-    return nodeSet;
+    throw new Error("Input too short");
   }
   input = input.slice(1, input.length - 1);
-  if (input.length === 0 || input.indexOf(",") === -1) {
-    console.error("Input too short");
+  input = input.trim();
+  if (input.length === 0) {
+    return nodeSet;
+  }
+  if (input.indexOf(",") === -1) {
+    nodeSet.add(cleanseInput(input));
     return nodeSet;
   }
   const sp = input.split(",");
   for (let s of sp) {
-    s = s.trim();
+    s = cleanseInput(s);
     if (s.length) nodeSet.add(s);
   }
   return nodeSet;

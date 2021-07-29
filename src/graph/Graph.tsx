@@ -1,37 +1,54 @@
 import React from "react";
 import { Graph as D3Graph } from "react-d3-graph";
 import { getTypeConfig } from "../parser/inputTypes";
-import { parseNodes } from "../parser/parseUtils";
 import * as Utils from "../utils/utils";
+import { performLayout } from "../layout/layoutTypes";
 
-type GraphProps = {
+export type GraphProps = {
   inputType: number;
   data: any;
   id: string;
   directed: boolean;
-  customNodes: string;
+  customNodes: Set<string>;
+  startNode: string | null;
+  selectedLayout: number;
 };
 
-const Graph = ({ inputType, data, id = "graph-id", directed, customNodes }: GraphProps) => {
+const Graph = ({
+  inputType,
+  data,
+  id = "graph-id",
+  directed,
+  customNodes,
+  startNode,
+  selectedLayout
+}: GraphProps) => {
   // the graph configuration, you only need to pass down properties
   // that you want to override, otherwise default ones will be used
 
-  if(customNodes && customNodes.length > 0) {
-    const nodeSet = parseNodes(customNodes);
-    if(nodeSet.size > 0) {
-      for(let n of data.nodes) {
-        nodeSet.add(n.id);
+  // add nodes from customNodes that don't already exist
+  if (customNodes && customNodes.size > 0) {
+    const seen = new Set();
+    for (let n of data.nodes) {
+      seen.add(n.id);
+    }
+    // add if not in seen
+    for (let nodeId of Array.from(customNodes)) {
+      if (!seen.has(nodeId)) {
+        seen.add(nodeId);
+        data.nodes.push({ id: nodeId, label: nodeId });
       }
-      const tempNodes = [];
-      for (let nodeId of Array.from(nodeSet)) {
-        let x = Utils.randomInRange(10, 800);
-        let y = Utils.randomInRange(10, 600);
-        tempNodes.push({ id: nodeId, x: x, y: y });
-      }
-      data.nodes = tempNodes;
     }
   }
 
+  // assign positions to all nodes
+  data.startNode = startNode;
+  for (let n of data.nodes) {
+    n.x = Utils.randomInRange(10, 700);
+    n.y = Utils.randomInRange(10, 350);
+  }
+
+  performLayout(selectedLayout, data);
   const myConfig = {
     nodeHighlightBehavior: true,
     staticGraphWithDragAndDrop: true,
@@ -41,7 +58,8 @@ const Graph = ({ inputType, data, id = "graph-id", directed, customNodes }: Grap
     node: {
       color: "lightgreen",
       size: 420,
-      labelPosition: "center"
+      labelPosition: "center",
+      labelProperty: "label" as any
     },
     link: {
       color: "blue",
@@ -94,10 +112,8 @@ const Graph = ({ inputType, data, id = "graph-id", directed, customNodes }: Grap
   //   window.alert(`Mouse out link between ${source} and ${target}`);
   // };
 
-  const onNodePositionChange = function(nodeId: string, x: number, y: number) {
-    window.alert(
-      `Node ${nodeId} is moved to new position. New position is x= ${x} y= ${y}`
-    );
+  const onNodePositionChange = function (nodeId: string, x: number, y: number) {
+    window.alert(`Node ${nodeId} is moved to new position. New position is x= ${x} y= ${y}`);
   };
 
   return (

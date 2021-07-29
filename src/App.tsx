@@ -1,134 +1,366 @@
 import React from "react";
+import clsx from "clsx";
 import "./App.css";
 import Graph from "./graph/Graph";
 import * as ParseUtils from "./parser/parseUtils";
-import * as Utils from "./utils/utils";
 import { InputType, getLabel } from "./parser/inputTypes";
-import { FormControl, MenuItem, InputLabel, Select } from "@material-ui/core";
-import { makeStyles } from "@material-ui/core/styles";
+import { LayoutType, getLayoutLabel } from "./layout/layoutTypes";
+import {
+  FormControl,
+  MenuItem,
+  InputLabel,
+  Select,
+  AppBar,
+  Drawer,
+  Toolbar,
+  Divider,
+  IconButton,
+  Typography,
+  TextField,
+  FormControlLabel,
+  Checkbox
+} from "@material-ui/core";
+import { Autocomplete } from "@material-ui/lab";
+import CssBaseline from "@material-ui/core/CssBaseline";
+import { useStyles } from "./styles/useStyles";
+import {
+  Menu as MenuIcon,
+  ChevronLeft as ChevronLeftIcon,
+  RotateRight as RotateRightIcon
+} from "@material-ui/icons";
+import { LabelWithTooltip, ColorButton, SelectedButton } from "./utils/helperComponents";
 
-const useStyles = makeStyles(theme => ({
-  formControl: {
-    margin: theme.spacing(1),
-    minWidth: 220
-  },
-  selectEmpty: {
-    marginTop: theme.spacing(2)
-  }
-}));
+const DEFAULT_GRAPH_INPUT = "[[2,1],[3,1],[1,4]]";
+const DEFAULT_CUSTOM_NODES_INPUT = "[]";
+
+export type DataType = {
+  nodes: Array<{
+    id: string;
+    label: string;
+    x?: number;
+    y?: number;
+  }>;
+  links: Array<{
+    source: string;
+    target: string;
+    label?: string;
+  }>;
+  startNode?: string;
+};
 
 function App() {
   const classes = useStyles();
-  const [inputValue, setInputValue] = React.useState("");
-  const [comboValue, setComboValue] = React.useState(0);
+  // layout
+  const [drawerOpen, setDrawerOpen] = React.useState(true);
+
+  // input data
+  const [inputValue, setInputValue] = React.useState(DEFAULT_GRAPH_INPUT);
+  const [comboValue, setComboValue] = React.useState(InputType.EdgePairs);
   const [directed, setDirected] = React.useState(true);
-  const [customNodes, setCustomNodes] = React.useState("");
+  const [oneIndexed, setOneIndexed] = React.useState(false);
+  const [customNodes, setCustomNodes] = React.useState(DEFAULT_GRAPH_INPUT);
+
+  const [allNodes, setAllNodes] = React.useState<Array<string>>([]);
+  const [startNode, setStartNode] = React.useState<string | null>(null);
+
+  // error handling
+  const [graphInputError, setGraphInputError] = React.useState("");
+  const [customNodesInputError, setCustomNodesInputError] = React.useState("");
 
   // graph payload (with minimalist structure)
-  const [data, setData] = React.useState({
+  const [customNodeSet, setCustomNodeSet] = React.useState(new Set<string>());
+  const [data, setData] = React.useState<DataType>({
     nodes: [
-      { id: "Harry", x: 50, y: 50 },
-      { id: "Sally", x: 100, y: 200 },
-      { id: "Alice", x: 200, y: 200 },
+      { id: "PlaceHolderNode1", label: "PlaceHolderNode1", x: 50, y: 50 },
+      { id: "PlaceHolderNode2", label: "PlaceHolderNode2", x: 100, y: 100 }
     ],
     links: [
-      { source: "Harry", target: "Sally", label: "test123" },
-      { source: "Harry", target: "Alice", label: "test456" },
-    ],
+      { source: "PlaceHolderNode1", target: "PlaceHolderNode2", label: "TestLinkLabel" }
+    ]
   });
 
+  // layout
+  const [selectedLayout, setSelectedLayout] = React.useState(LayoutType.ForceLayout);
+
+  const graphInputRef = React.useRef<any>();
+  const customNodesInputRef = React.useRef<any>();
+
+  // handle changes to graph input, input type, associated options (i.e. 1-indexed)
   React.useEffect(() => {
     if (!inputValue) return;
 
     let parsedValue: any;
     try {
-      parsedValue = ParseUtils.processInput(inputValue, comboValue);
+      parsedValue = ParseUtils.processInput(inputValue, comboValue, { oneIndexed });
     } catch (error) {
-      console.log(error);
+      setGraphInputError(error.message);
       return;
     }
 
-    const tempNodes: Array<any> = [];
+    const nodeToLabel = parsedValue.nodeToLabel ? parsedValue.nodeToLabel : {};
 
-    for (let nodeId of Array.from(parsedValue.nodeSet)) {
-      let x = Utils.randomInRange(10, 800);
-      let y = Utils.randomInRange(10, 600);
-      tempNodes.push({ id: nodeId, x: x, y: y });
+    parsedValue.nodes = Array.from(parsedValue.nodeSet).map(nodeId => {
+      return {
+        id: nodeId as string,
+        label: nodeToLabel.hasOwnProperty(nodeId) ? nodeToLabel[nodeId as string] : nodeId
+      };
+    });
+    if (parsedValue.startNode) {
+      setStartNode(parsedValue.startNode);
+    } else {
+      setStartNode(null);
     }
 
-    console.log(parsedValue);
-    parsedValue.nodes = tempNodes;
+    setGraphInputError("");
     setData(parsedValue);
-  }, [inputValue]);
+  }, [inputValue, comboValue, oneIndexed]);
+
+  // handle changes to custom nodes input ()
+  React.useEffect(() => {
+    if (!customNodes) return;
+
+    let parsedValue: Set<string>;
+    try {
+      parsedValue = ParseUtils.parseNodes(customNodes);
+    } catch (ex) {
+      setCustomNodesInputError(ex.message);
+      return;
+    }
+    setCustomNodesInputError("");
+    setCustomNodeSet(parsedValue);
+  }, [customNodes]);
+
+  React.useEffect(() => {
+    let allNodesSet = new Set();
+    for (let n of data.nodes) {
+      allNodesSet.add(n.id);
+    }
+    for (let nodeId of Array.from(customNodeSet)) {
+      allNodesSet.add(nodeId);
+    }
+    let tempAllNodes = Array.from(allNodesSet) as Array<string>;
+    tempAllNodes.sort();
+    if (!allNodesSet.has(startNode)) {
+      setStartNode(null);
+    }
+    setAllNodes(tempAllNodes);
+  }, [customNodeSet, data]);
 
   return (
-    <>
-      <FormControl className={classes.formControl}>
-        <InputLabel id="graph-input-type-label">Input Type</InputLabel>
-        <Select
-          labelId="graph-input-type-label"
-          id="graph-input-type"
-          value={comboValue}
-          className={classes.selectEmpty}
-          onChange={e => {
-            setComboValue(parseInt(e.target.value as string));
-          }}
-        >
-          {Object.keys(InputType)
-            .filter(k => typeof InputType[k as any] !== "number")
-            .map(key => (
-              <MenuItem key={key} value={key}>
-                {getLabel(parseInt(key))}
-              </MenuItem>
-            ))}
-        </Select>
-      </FormControl>
-      [[2,1],[3,1],[1,4]]
-      <br />
-      [[1],[],[0,5],[],[1,3,0],[0]]
-      <br />
-      <form>
-        <label>
-          Directed: {" "}
-          <input
-            type="checkbox"
-            value={"directedValue"}
-            checked={directed}
-            onChange={e => setDirected(!directed)}
-          />
-        </label>
-        <br />
-        <label>
-          Graph Input:
-          <textarea
-            id="graph-input"
-            name="graph-input"
-            value={inputValue}
-            onChange={(event) => {
-              setInputValue(event.target.value);
+    <div className={classes.root}>
+      <CssBaseline />
+      <AppBar
+        position="fixed"
+        className={clsx(classes.appBar, {
+          [classes.appBarShift]: drawerOpen
+        })}
+      >
+        <Toolbar>
+          <IconButton
+            color="inherit"
+            aria-label="open drawer"
+            onClick={() => {
+              setDrawerOpen(true);
             }}
-          />
-        </label>
-        <label>
-          Custom Nodes:
-          <textarea
-            id="custom-nodes"
-            name="custom-nodes"
-            value={customNodes}
-            onChange={(event) => {
-              setCustomNodes(event.target.value);
+            edge="start"
+            className={clsx(classes.menuButton, drawerOpen && classes.hide)}
+          >
+            <MenuIcon />
+          </IconButton>
+          <Typography variant="h6" noWrap>
+            Choose Layout:
+          </Typography>
+          {Object.keys(LayoutType)
+            .filter(k => typeof LayoutType[k as any] !== "number")
+            .map(key => {
+              let currLayoutType = parseInt(key);
+              return currLayoutType === selectedLayout ? (
+                <SelectedButton
+                  className={classes.layoutButton}
+                  variant="contained"
+                  onClick={() => {
+                    setSelectedLayout(currLayoutType);
+                  }}
+                >
+                  {getLayoutLabel(parseInt(key))}
+                </SelectedButton>
+              ) : (
+                <ColorButton
+                  className={classes.layoutButton}
+                  variant="contained"
+                  onClick={() => {
+                    setSelectedLayout(currLayoutType);
+                  }}
+                >
+                  {getLayoutLabel(parseInt(key))}
+                </ColorButton>
+              );
+            })}
+          <div className={classes.rotateButton}>
+            <IconButton
+              color="inherit"
+              onClick={() => {
+                // TODO: rotate layout
+              }}
+              edge="start"
+            >
+              <RotateRightIcon />
+            </IconButton>
+          </div>
+        </Toolbar>
+      </AppBar>
+      <Drawer
+        className={classes.drawer}
+        variant="persistent"
+        anchor="left"
+        open={drawerOpen}
+        classes={{
+          paper: classes.drawerPaper
+        }}
+      >
+        <div className={classes.drawerHeader}>
+          <Typography className={classes.drawerHeaderText} variant="h6" noWrap>
+            Graph Input
+          </Typography>
+          <IconButton
+            onClick={() => {
+              setDrawerOpen(false);
             }}
+          >
+            <ChevronLeftIcon />
+          </IconButton>
+        </div>
+        <div>
+          <Divider />
+          <FormControl className={classes.formControl}>
+            <TextField
+              InputLabelProps={{ style: { pointerEvents: "auto" } }}
+              label={
+                <LabelWithTooltip
+                  label={"Graph Input"}
+                  tooltipText={"Enter the text representation of the graph."}
+                  inputRef={graphInputRef}
+                />
+              }
+              inputRef={graphInputRef}
+              placeholder="Please enter graph input."
+              multiline
+              rows={3}
+              rowsMax={10}
+              variant="outlined"
+              value={inputValue}
+              onChange={event => {
+                setInputValue(event.target.value);
+              }}
+              error={graphInputError.length > 0}
+              helperText={graphInputError}
+            />
+          </FormControl>
+          <FormControl className={classes.formControl}>
+            <InputLabel id="graph-input-type-label">Input Type</InputLabel>
+            <Select
+              labelId="graph-input-type-label"
+              id="graph-input-type"
+              value={comboValue}
+              className={classes.selectEmpty}
+              variant="outlined"
+              onChange={e => {
+                setComboValue(parseInt(e.target.value as string));
+              }}
+            >
+              {Object.keys(InputType)
+                .filter(k => typeof InputType[k as any] !== "number")
+                .sort((a, b) => getLabel(parseInt(a)).localeCompare(getLabel(parseInt(b))))
+                .map(key => (
+                  <MenuItem key={key} value={key}>
+                    {getLabel(parseInt(key))}
+                  </MenuItem>
+                ))}
+            </Select>
+          </FormControl>
+          {comboValue === InputType.AdjacencyList && (
+            <FormControlLabel
+              className={classes.formControlLabel}
+              control={
+                <Checkbox
+                  checked={oneIndexed}
+                  onChange={e => setOneIndexed(!oneIndexed)}
+                  name="oneIndexedValue"
+                  color="primary"
+                />
+              }
+              label="1-indexed"
+            />
+          )}
+          <FormControlLabel
+            className={classes.formControlLabel}
+            control={
+              <Checkbox
+                checked={directed}
+                onChange={e => setDirected(!directed)}
+                name="directedValue"
+                color="primary"
+              />
+            }
+            label="Directed"
           />
-        </label>
-      </form>
-      <Graph
-        id="graph-id" // id is mandatory, if no id is defined rd3g will throw an error
-        inputType={comboValue}
-        directed={directed}
-        customNodes={customNodes}
-        data={data}
-      />
-    </>
+          <FormControl className={classes.formControl}>
+            <Autocomplete
+              options={allNodes}
+              value={startNode && startNode.length > 0 ? startNode : null}
+              onChange={(event: React.ChangeEvent<{}>, newValue: string | null) => {
+                if (newValue) setStartNode(newValue);
+              }}
+              renderInput={(params: any) => (
+                <TextField {...params} label="Start Node" margin="normal" variant="outlined" />
+              )}
+            />
+          </FormControl>
+          <FormControl className={classes.formControl}>
+            <TextField
+              InputLabelProps={{ style: { pointerEvents: "auto" } }}
+              label={
+                <LabelWithTooltip
+                  label={"Custom Node Set"}
+                  tooltipText={
+                    "(Optional) Specify if the set of nodes is described in a separate list from the edges."
+                  }
+                  inputRef={customNodesInputRef}
+                />
+              }
+              inputRef={customNodesInputRef}
+              placeholder="Enter custom node set here."
+              multiline
+              rows={3}
+              rowsMax={10}
+              variant="outlined"
+              value={customNodes}
+              onChange={event => {
+                setCustomNodes(event.target.value);
+              }}
+              error={customNodesInputError.length > 0}
+              helperText={customNodesInputError}
+            />
+          </FormControl>
+        </div>
+      </Drawer>
+      <main
+        className={clsx(classes.mainContent, {
+          [classes.contentShift]: drawerOpen
+        })}
+      >
+        <div className={classes.drawerHeader} />
+        <Graph
+          id="graph-id" // id is mandatory, if no id is defined rd3g will throw an error
+          inputType={comboValue}
+          directed={directed}
+          customNodes={customNodeSet}
+          startNode={startNode}
+          data={data}
+          selectedLayout={selectedLayout}
+        />
+      </main>
+    </div >
   );
 }
 
