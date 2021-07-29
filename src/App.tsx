@@ -25,17 +25,20 @@ import CssBaseline from "@material-ui/core/CssBaseline";
 import { useStyles } from "./styles/useStyles";
 import { Menu as MenuIcon, ChevronLeft as ChevronLeftIcon } from "@material-ui/icons";
 
+const DEFAULT_GRAPH_INPUT = "[[2,1],[3,1],[1,4]]";
+const DEFAULT_CUSTOM_NODES_INPUT = "[5]";
+
 function App() {
   const classes = useStyles();
   // layout
   const [drawerOpen, setDrawerOpen] = React.useState(true);
 
   // input data
-  const [inputValue, setInputValue] = React.useState("");
+  const [inputValue, setInputValue] = React.useState(DEFAULT_GRAPH_INPUT);
   const [comboValue, setComboValue] = React.useState(0);
   const [directed, setDirected] = React.useState(true);
   const [oneIndexed, setOneIndexed] = React.useState(true);
-  const [customNodes, setCustomNodes] = React.useState("");
+  const [customNodes, setCustomNodes] = React.useState(DEFAULT_GRAPH_INPUT);
 
   // graph payload (with minimalist structure)
   const [data, setData] = React.useState({
