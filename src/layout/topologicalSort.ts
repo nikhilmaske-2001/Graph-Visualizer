@@ -35,8 +35,10 @@ export function layoutTopoSort(data: MyDataType, spacing: { x: number; y: number
     let roots = findNodesWithZeroIndegree(comp, links, startNode);
     if (roots.length === 0) {
       // return error message
-      return "Invalid Graph: cycle detected in graph. Topological Sort can only be performed on graphs without cycles.";
+      return "Invalid Graph: cycle detected in graph. Topological Sort can only be performed on graphs without cycles. Could not find an appropriate source node.";
     }
+
+
     let curr = roots;
     let baselineY = prevMaxY
       ? prevMaxY + DEFAULT_SPACE_BETWEEN_COMPONENTS
@@ -98,10 +100,9 @@ export function layoutTopoSort(data: MyDataType, spacing: { x: number; y: number
     // if there are nodes in this component not in seen, there was a cycle; return error
     for (let node of comp) {
       if (!seen.has(node.id)) {
-        return "Invalid Graph: cycle detected in graph. Topological Sort can only be performed on graphs without cycles.";
+       return "Invalid Graph: cycle detected in graph. Topological Sort generally can only be performed on graphs without cycles. There was trouble deriving one or more source nodes.";
       }
     }
-
     prevMaxY = currMaxY;
   }
 }
