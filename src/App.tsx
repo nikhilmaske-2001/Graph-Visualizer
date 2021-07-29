@@ -41,6 +41,7 @@ function App() {
   const [customNodes, setCustomNodes] = React.useState(DEFAULT_GRAPH_INPUT);
 
   // graph payload (with minimalist structure)
+  const [customNodeSet, setCustomNodeSet] = React.useState(new Set<string>());
   const [data, setData] = React.useState({
     nodes: [
       { id: "Harry", x: 50, y: 50 },
@@ -53,6 +54,7 @@ function App() {
     ],
   });
 
+  // handle changes to graph input, input type, associated options (i.e. 1-indexed)
   React.useEffect(() => {
     if (!inputValue) return;
 
@@ -75,7 +77,21 @@ function App() {
     console.log(parsedValue);
     parsedValue.nodes = tempNodes;
     setData(parsedValue);
-  }, [inputValue, oneIndexed]);
+  }, [inputValue, comboValue, oneIndexed]);
+
+  // handle changes to custom nodes input ()
+  React.useEffect(() => {
+    if (!customNodes) return;
+
+    let parsedValue: Set<string>;
+    try {
+      parsedValue = ParseUtils.parseNodes(customNodes);
+    } catch (ex) {
+      console.error(ex);
+      return;
+    }
+    setCustomNodeSet(parsedValue);
+  }, [customNodes]);
 
   return (
     <div className={classes.root}>
@@ -218,7 +234,7 @@ function App() {
           id="graph-id" // id is mandatory, if no id is defined rd3g will throw an error
           inputType={comboValue}
           directed={directed}
-          customNodes={customNodes}
+          customNodes={customNodeSet}
           data={data}
         />
       </main>
