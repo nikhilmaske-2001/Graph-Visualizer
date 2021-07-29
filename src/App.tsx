@@ -103,6 +103,7 @@ function App() {
 
   const graphInputRef = React.useRef<any>();
   const customNodesInputRef = React.useRef<any>();
+  const reverseRef = React.useRef(false);
 
   // handle changes to graph input, input type, associated options (i.e. 1-indexed)
   React.useEffect(() => {
@@ -124,6 +125,12 @@ function App() {
       return;
     }
 
+    let reverseChanged = false;
+    if (reverseEdges !== reverseRef.current) {
+      reverseChanged = true;
+      reverseRef.current = reverseEdges;
+    }
+
     const nodeToLabel = parsedValue.nodeToLabel ? parsedValue.nodeToLabel : {};
 
     parsedValue.nodes = Array.from(parsedValue.nodeSet).map(nodeId => {
@@ -135,7 +142,9 @@ function App() {
     if (parsedValue.startNode) {
       setStartNode(parsedValue.startNode);
     } else {
-      setStartNode(null);
+      if (!reverseChanged) {
+        setStartNode(null);
+      }
     }
 
     setGraphInputError("");
