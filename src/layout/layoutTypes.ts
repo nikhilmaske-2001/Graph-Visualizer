@@ -5,7 +5,8 @@ import { MyDataType } from "../App";
 export enum LayoutType {
   Tree,
   ForceLayout,
-  TopologicalSort
+  TopologicalSort,
+  ForceLayout
 }
 
 export function getLayoutLabel(type: number) {

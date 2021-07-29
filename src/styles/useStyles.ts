@@ -45,12 +45,7 @@ export const useStyles = makeStyles(theme => ({
   },
   hide: {
     display: "none"
-  },
-  rotateButton: {
-    display: "flex",
-    flex: 1,
-    justifyContent: "flex-end"
-  },
+  }, 
   mainContent: {
     flexGrow: 1,
     padding: theme.spacing(3),
