@@ -1,10 +1,13 @@
 import { InputType } from "../parser/inputTypes";
 import { layoutTree } from "./treeLayout";
+import { layoutArc } from "./arcLayout";
+import { MyDataType } from "../App";
 
 export enum LayoutType {
   Tree,
   ForceLayout,
-  TopologicalSort
+  TopologicalSort,
+  Arc
 }
 
 export function getLayoutLabel(type: number) {
@@ -15,6 +18,8 @@ export function getLayoutLabel(type: number) {
       return "Force-Directed";
     case LayoutType.TopologicalSort:
       return "Topological Sort";
+    case LayoutType.Arc:
+      return "Arc";
     default:
       return "Error Label";
   }
@@ -37,10 +42,15 @@ export function getDefaultLayout({ inputType, data, directed, customNodes, start
   }
 }
 
-export function performLayout(type: number, data: any) {
-  switch (type) {
+export function performLayout(layoutType: number, data: MyDataType, inputType: number) {
+  switch (layoutType) {
     case LayoutType.Tree:
-      return layoutTree(data);
+      return layoutTree(data, inputType);
+    case LayoutType.Arc:
+      return layoutArc(data);
+    case LayoutType.ForceLayout:
+      // Handled within Graph.tsx
+      return;
     default:
       console.error("unhandled layout type");
       return;

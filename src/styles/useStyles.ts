@@ -5,7 +5,8 @@ const drawerWidth = 300;
 export const useStyles = makeStyles(theme => ({
   // layout styles
   root: {
-    display: "flex"
+    display: "flex",
+    overflow: "hidden"
   },
   appBar: {
     transition: theme.transitions.create(["margin", "width"], {
@@ -40,17 +41,11 @@ export const useStyles = makeStyles(theme => ({
     width: "100%"
   },
   menuButton: {
-    marginRight: theme.spacing(2),
-    flex: 1
+    marginRight: theme.spacing(2)
   },
   hide: {
     display: "none"
-  },
-  rotateButton: {
-    display: "flex",
-    flex: 1,
-    justifyContent: "flex-end"
-  },
+  }, 
   mainContent: {
     flexGrow: 1,
     padding: theme.spacing(3),
@@ -70,6 +65,11 @@ export const useStyles = makeStyles(theme => ({
   layoutButton: {
     marginLeft: 10,
     marginRight: 0
+  },
+  searchBar: {
+    display: "flex",
+    flex: 1,
+    justifyContent: "flex-end"
   },
   
   // form styles

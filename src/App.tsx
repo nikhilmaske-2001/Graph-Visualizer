@@ -23,29 +23,45 @@ import {
 import { Autocomplete } from "@material-ui/lab";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import { useStyles } from "./styles/useStyles";
-import {
-  Menu as MenuIcon,
-  ChevronLeft as ChevronLeftIcon,
-  RotateRight as RotateRightIcon
-} from "@material-ui/icons";
+import { Menu as MenuIcon, ChevronLeft as ChevronLeftIcon } from "@material-ui/icons";
 import { LabelWithTooltip, ColorButton, SelectedButton } from "./utils/helperComponents";
+import { TreeNode } from "./layout/treeLayout";
+import SearchBar from "material-ui-search-bar";
 
-const DEFAULT_GRAPH_INPUT = "[[2,1],[3,1],[1,4]]";
-const DEFAULT_CUSTOM_NODES_INPUT = "[]";
+const DEFAULT_INPUT_TYPE = InputType.EdgePairs;
+const DEFAULT_LAYOUT_TYPE = LayoutType.Arc;
+const DEFAULT_GRAPH_INPUT = `[
+  ['DSM', 'ORD'],
+  ['ORD', 'BGI'],
+  ['BGI', 'LGA'],
+  ['SIN', 'CDG'],
+  ['CDG', 'SIN'],
+  ['CDG', 'BUD'],
+  ['DEL', 'DOH'],
+  ['DEL', 'CDG'],
+  ['TLV', 'DEL'],
+  ['EWR', 'HND'],
+  ['HND', 'ICN'],
+  ['HND', 'JFK'],
+  ['ICN', 'JFK'],
+  ['JFK', 'LGA'],
+  ['EYW', 'LHR'],
+  ['LHR', 'SFO'],
+  ['SFO', 'SAN'],
+  ['SFO', 'DSM'],
+  ['SAN', 'EYW']
+]`;
+const DEFAULT_CUSTOM_NODES_INPUT = "";
 
-export type DataType = {
-  nodes: Array<{
-    id: string;
-    label: string;
-    x?: number;
-    y?: number;
-  }>;
-  links: Array<{
-    source: string;
-    target: string;
-    label?: string;
-  }>;
+export type MyGraphNodeType = { id: string; label: string; x?: number; y?: number };
+export type MyGraphLinkType = { source: string; target: string; label?: string };
+export type MyDataType = {
+  nodes: Array<MyGraphNodeType>;
+  links: Array<MyGraphLinkType>;
   startNode?: string;
+  directed?: boolean;
+  tree?: TreeNode;
+  idToTreeNode?: { [key: string]: TreeNode };
 };
 
 function App() {
@@ -55,9 +71,10 @@ function App() {
 
   // input data
   const [inputValue, setInputValue] = React.useState(DEFAULT_GRAPH_INPUT);
-  const [comboValue, setComboValue] = React.useState(InputType.EdgePairs);
+  const [comboValue, setComboValue] = React.useState(DEFAULT_INPUT_TYPE);
   const [directed, setDirected] = React.useState(true);
-  const [oneIndexed, setOneIndexed] = React.useState(false);
+  const [oneIndexed, setOneIndexed] = React.useState(false); // used for adjacency lists
+  const [reverseEdges, setReverseEdges] = React.useState(false); // used for edge pairs
   const [customNodes, setCustomNodes] = React.useState(DEFAULT_GRAPH_INPUT);
 
   const [allNodes, setAllNodes] = React.useState<Array<string>>([]);
@@ -69,7 +86,7 @@ function App() {
 
   // graph payload (with minimalist structure)
   const [customNodeSet, setCustomNodeSet] = React.useState(new Set<string>());
-  const [data, setData] = React.useState<DataType>({
+  const [data, setData] = React.useState<MyDataType>({
     nodes: [
       { id: "PlaceHolderNode1", label: "PlaceHolderNode1", x: 50, y: 50 },
       { id: "PlaceHolderNode2", label: "PlaceHolderNode2", x: 100, y: 100 }
@@ -80,7 +97,9 @@ function App() {
   });
 
   // layout
-  const [selectedLayout, setSelectedLayout] = React.useState(LayoutType.ForceLayout);
+  const [selectedLayout, setSelectedLayout] = React.useState(DEFAULT_LAYOUT_TYPE);
+  const [searchInputValue, setSearchInputValue] = React.useState("");
+  const [searchText, setSearchText] = React.useState("");
 
   const graphInputRef = React.useRef<any>();
   const customNodesInputRef = React.useRef<any>();
@@ -91,7 +110,15 @@ function App() {
 
     let parsedValue: any;
     try {
-      parsedValue = ParseUtils.processInput(inputValue, comboValue, { oneIndexed });
+      parsedValue = ParseUtils.processInput(inputValue, comboValue, {
+        oneIndexed,
+        reverseEdges
+      });
+
+      if (parsedValue.nodeSet.size === 0) {
+        setGraphInputError("There are no valid nodes in the input.");
+        return;
+      }
     } catch (error) {
       setGraphInputError(error.message);
       return;
@@ -113,7 +140,7 @@ function App() {
 
     setGraphInputError("");
     setData(parsedValue);
-  }, [inputValue, comboValue, oneIndexed]);
+  }, [inputValue, comboValue, oneIndexed, reverseEdges]);
 
   // handle changes to custom nodes input ()
   React.useEffect(() => {
@@ -140,9 +167,7 @@ function App() {
     }
     let tempAllNodes = Array.from(allNodesSet) as Array<string>;
     tempAllNodes.sort();
-    if (!allNodesSet.has(startNode)) {
-      setStartNode(null);
-    }
+
     setAllNodes(tempAllNodes);
   }, [customNodeSet, data]);
 
@@ -168,7 +193,7 @@ function App() {
             <MenuIcon />
           </IconButton>
           <Typography variant="h6" noWrap>
-            Choose Layout:
+            Choose Layout Type:
           </Typography>
           {Object.keys(LayoutType)
             .filter(k => typeof LayoutType[k as any] !== "number")
@@ -176,6 +201,7 @@ function App() {
               let currLayoutType = parseInt(key);
               return currLayoutType === selectedLayout ? (
                 <SelectedButton
+                  key={key}
                   className={classes.layoutButton}
                   variant="contained"
                   onClick={() => {
@@ -186,6 +212,7 @@ function App() {
                 </SelectedButton>
               ) : (
                 <ColorButton
+                  key={key}
                   className={classes.layoutButton}
                   variant="contained"
                   onClick={() => {
@@ -196,16 +223,18 @@ function App() {
                 </ColorButton>
               );
             })}
-          <div className={classes.rotateButton}>
-            <IconButton
-              color="inherit"
-              onClick={() => {
-                // TODO: rotate layout
+          <div className={classes.searchBar}>
+            <SearchBar
+              value={searchInputValue}
+              onChange={newValue => setSearchInputValue(newValue)}
+              onRequestSearch={() => setSearchText(searchInputValue)}
+              onCancelSearch={() => setSearchText("")}
+              placeholder={"Search Nodes"}
+              style={{
+                width: 200,
+                height: 36
               }}
-              edge="start"
-            >
-              <RotateRightIcon />
-            </IconButton>
+            />
           </div>
         </Toolbar>
       </AppBar>
@@ -292,6 +321,20 @@ function App() {
               label="1-indexed"
             />
           )}
+          {comboValue === InputType.EdgePairs && (
+            <FormControlLabel
+              className={classes.formControlLabel}
+              control={
+                <Checkbox
+                  checked={reverseEdges}
+                  onChange={e => setReverseEdges(!reverseEdges)}
+                  name="reverseValue"
+                  color="primary"
+                />
+              }
+              label="Reverse"
+            />
+          )}
           <FormControlLabel
             className={classes.formControlLabel}
             control={
@@ -358,6 +401,8 @@ function App() {
           startNode={startNode}
           data={data}
           selectedLayout={selectedLayout}
+          drawerOpen={drawerOpen}
+          searchText={searchText}
         />
       </main>
     </div >

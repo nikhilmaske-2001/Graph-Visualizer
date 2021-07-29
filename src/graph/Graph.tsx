@@ -2,7 +2,13 @@ import React from "react";
 import { Graph as D3Graph } from "react-d3-graph";
 import { getTypeConfig } from "../parser/inputTypes";
 import * as Utils from "../utils/utils";
-import { performLayout } from "../layout/layoutTypes";
+import * as LayoutUtils from "../layout/layoutUtils";
+import { performLayout, LayoutType } from "../layout/layoutTypes";
+
+export const DEFAULT_LEFT_PADDING = 100;
+export const DEFAULT_RIGHT_PADDING = 100;
+export const DEFAULT_TOP_PADDING = 50;
+export const DEFAULT_EXTRA_NODE_SPACING = 50;
 
 export type GraphProps = {
   inputType: number;
@@ -12,7 +18,20 @@ export type GraphProps = {
   customNodes: Set<string>;
   startNode: string | null;
   selectedLayout: number;
+  drawerOpen: boolean;
+  searchText: string;
 };
+
+function debounce(fn: any, ms: number) {
+  let timer: any;
+  return (_: any) => {
+    clearTimeout(timer);
+    timer = setTimeout(_ => {
+      timer = null;
+      fn();
+    }, ms);
+  };
+}
 
 const Graph = ({
   inputType,
@@ -21,12 +40,63 @@ const Graph = ({
   directed,
   customNodes,
   startNode,
-  selectedLayout
+  selectedLayout,
+  drawerOpen,
+  searchText
 }: GraphProps) => {
   // the graph configuration, you only need to pass down properties
   // that you want to override, otherwise default ones will be used
+  const [dimensions, setDimensions] = React.useState({
+    height: window.innerHeight,
+    width: window.innerWidth
+  });
+
+  const [oldToNewId, setOldToNewId] = React.useState<{ [key: string]: string }>({});
+
+  React.useEffect(() => {
+    const debouncedHandleResize = debounce(function handleResize() {
+      setDimensions({
+        height: window.innerHeight,
+        width: window.innerWidth
+      });
+    }, 100);
+    window.addEventListener("resize", debouncedHandleResize);
+  });
+
+  // every time node set changes, we need to check to see if there are any conflicts in node ids
+  React.useEffect(() => {
+    const allIds = new Set<string>(Object.values(oldToNewId));
+    const currIdMap: { [key: string]: string } = {};
+    for (let node of data.nodes) {
+      let nodeId = node.id;
+      if (allIds.has(nodeId)) {
+        currIdMap[nodeId] = nodeId + "-1"; // add a 1 if there is a conflict
+      } else {
+        currIdMap[nodeId] = nodeId;
+      }
+    }
+    for (let nodeId of Array.from(customNodes)) {
+      if (allIds.has(nodeId)) {
+        currIdMap[nodeId] = nodeId + "-1";
+      } else {
+        currIdMap[nodeId] = nodeId;
+      }
+    }
+    setOldToNewId(currIdMap);
+  }, [data, customNodes, selectedLayout, startNode]);
+
+
+  const graphPaneHeight = dimensions.height - 120;
+  const graphPaneWidth = drawerOpen ? dimensions.width - 350 : dimensions.width - 50;
+
+  // generate random positions by default (for testing purposes only)
+  for (let n of data.nodes) {
+    n.x = Utils.randomInRange(DEFAULT_LEFT_PADDING * 1.5, graphPaneWidth - DEFAULT_LEFT_PADDING * 1.5);
+    n.y = Utils.randomInRange(DEFAULT_TOP_PADDING * 1.5, graphPaneHeight - DEFAULT_TOP_PADDING * 1.5);
+  }
 
   // add nodes from customNodes that don't already exist
+  let extraNodes = [...LayoutUtils.getExtraNodes(data.nodes, data.links)];
   if (customNodes && customNodes.size > 0) {
     const seen = new Set();
     for (let n of data.nodes) {
@@ -36,24 +106,31 @@ const Graph = ({
     for (let nodeId of Array.from(customNodes)) {
       if (!seen.has(nodeId)) {
         seen.add(nodeId);
-        data.nodes.push({ id: nodeId, label: nodeId });
+        extraNodes.push({ id: nodeId, label: nodeId });
       }
     }
   }
 
-  // assign positions to all nodes
-  data.startNode = startNode;
-  for (let n of data.nodes) {
-    n.x = Utils.randomInRange(10, 700);
-    n.y = Utils.randomInRange(10, 350);
+  // calculate positions for extra nodes
+  let x = graphPaneWidth - DEFAULT_RIGHT_PADDING;
+  let y = DEFAULT_TOP_PADDING;
+  for (let node of extraNodes) {
+    node.x = x;
+    node.y = y;
+    y += DEFAULT_EXTRA_NODE_SPACING;
   }
 
-  performLayout(selectedLayout, data);
+  // run layout on all connectd components
+  data.startNode = startNode;
+  data.directed = directed;
+
+  performLayout(selectedLayout, data, inputType);
+
   const myConfig = {
     nodeHighlightBehavior: true,
-    staticGraphWithDragAndDrop: true,
-    width: 1200,
-    height: 800,
+    staticGraphWithDragAndDrop: selectedLayout !== LayoutType.ForceLayout,
+    width: graphPaneWidth,
+    height: graphPaneHeight,
     directed: directed,
     node: {
       color: "lightgreen",
@@ -63,75 +140,60 @@ const Graph = ({
     },
     link: {
       color: "blue",
-      renderLabel: getTypeConfig(inputType).weighted
+      renderLabel: getTypeConfig(inputType).weighted,
+      type: selectedLayout === LayoutType.Arc ? "CURVE_SMOOTH" : "STRAIGHT"
+    },
+    focusZoom: 1
+  };
+
+
+  const argNodes = [];
+  const argLinks = [];
+  let focusId: string | undefined;
+  const seen = new Set<string>();
+  for (let node of [...data.nodes, ...extraNodes]) {
+    let nodeId = node.id;
+    if (seen.has(nodeId)) {
+      continue;
     }
-  };
+    seen.add(nodeId);
+    if (node.label.toLowerCase() === searchText.trim().toLowerCase()) {
+      focusId = nodeId;
+      argNodes.push({
+        ...node,
+        id: oldToNewId[nodeId] || nodeId,
+        color: "red",
+        fontColor: "white"
+      });
+    } else {
+      argNodes.push({ ...node, id: oldToNewId[nodeId] || nodeId });
+    }
+  }
 
-  // graph event callbacks
-  // const onClickGraph = function() {
-  //   window.alert(`Clicked the graph background`);
-  // };
+  let linksToAdd = data.links;
+  if (directed === false) {
+    linksToAdd = LayoutUtils.removeRepeatedEdges(data.links);
+  }
 
-  // const onClickNode = function(nodeId: string) {
-  //   window.alert(`Clicked node ${nodeId}`);
-  // };
+  for (let link of linksToAdd) {
+    argLinks.push({
+      ...link,
+      source: oldToNewId[link.source] || link.source,
+      target: oldToNewId[link.target] || link.target
+    });
+  }
 
-  // const onDoubleClickNode = function(nodeId: string) {
-  //   window.alert(`Double clicked node ${nodeId}`);
-  // };
 
-  // const onRightClickNode = function(event: any, nodeId: string) {
-  //   window.alert(`Right clicked node ${nodeId}`);
-  // };
-
-  // const onMouseOverNode = function(nodeId: string) {
-  //   window.alert(`Mouse over node ${nodeId}`);
-  // };
-
-  // const onMouseOutNode = function(nodeId: string) {
-  //   window.alert(`Mouse out node ${nodeId}`);
-  // };
-
-  // const onClickLink = function(source: string, target: string) {
-  //   window.alert(`Clicked link between ${source} and ${target}`);
-  // };
-
-  // const onRightClickLink = function(
-  //   event: any,
-  //   source: string,
-  //   target: string
-  // ) {
-  //   window.alert(`Right clicked link between ${source} and ${target}`);
-  // };
-
-  // const onMouseOverLink = function(source: string, target: string) {
-  //   window.alert(`Mouse over in link between ${source} and ${target}`);
-  // };
-
-  // const onMouseOutLink = function(source: string, target: string) {
-  //   window.alert(`Mouse out link between ${source} and ${target}`);
-  // };
-
-  const onNodePositionChange = function (nodeId: string, x: number, y: number) {
-    window.alert(`Node ${nodeId} is moved to new position. New position is x= ${x} y= ${y}`);
-  };
 
   return (
     <D3Graph
       id="graph-id" // id is mandatory, if no id is defined rd3g will throw an error
-      data={data}
+      data={{
+        nodes: argNodes,
+        links: argLinks,
+        focusedNodeId: focusId ? oldToNewId[focusId] : undefined
+      }}
       config={myConfig}
-      // onClickNode={onClickNode}
-      // onDoubleClickNode={onDoubleClickNode}
-      // onRightClickNode={onRightClickNode}
-      // onClickGraph={onClickGraph}
-      // onClickLink={onClickLink}
-      // onRightClickLink={onRightClickLink}
-      // onMouseOverNode={onMouseOverNode}
-      // onMouseOutNode={onMouseOutNode}
-      // onMouseOverLink={onMouseOverLink}
-      // onMouseOutLink={onMouseOutLink}
-      onNodePositionChange={onNodePositionChange}
     />
   );
 };
