@@ -352,7 +352,7 @@ function App() {
               InputLabelProps={{ style: { pointerEvents: "auto" } }}
               label={
                 <LabelWithTooltip
-                  label={"Custom Node Set"}
+                  label={"Custom Node List"}
                   tooltipText={
                     "(Optional) Specify if the set of nodes is described in a separate list from the edges."
                   }
