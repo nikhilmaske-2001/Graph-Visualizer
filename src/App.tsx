@@ -18,7 +18,8 @@ import {
   Typography,
   TextareaAutosize,
   FormControlLabel,
-  Checkbox
+  Checkbox,
+  Button
 } from "@material-ui/core";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import { useStyles } from "./styles/useStyles";
@@ -36,6 +37,7 @@ function App() {
   const [inputValue, setInputValue] = React.useState("");
   const [comboValue, setComboValue] = React.useState(0);
   const [directed, setDirected] = React.useState(true);
+  const [oneIndexed, setOneIndexed] = React.useState(true);
   const [customNodes, setCustomNodes] = React.useState("");
 
   // graph payload (with minimalist structure)
@@ -56,7 +58,7 @@ function App() {
 
     let parsedValue: any;
     try {
-      parsedValue = ParseUtils.processInput(inputValue, comboValue);
+      parsedValue = ParseUtils.processInput(inputValue, comboValue, { oneIndexed });
     } catch (error) {
       console.log(error);
       return;
@@ -73,7 +75,7 @@ function App() {
     console.log(parsedValue);
     parsedValue.nodes = tempNodes;
     setData(parsedValue);
-  }, [inputValue]);
+  }, [inputValue, oneIndexed]);
 
   return (
     <div className={classes.root}>
@@ -97,8 +99,28 @@ function App() {
             <MenuIcon />
           </IconButton>
           <Typography variant="h6" noWrap>
-            TODO: Layout Buttons
+            Choose Layout:
           </Typography>
+          <Button className={classes.layoutButton} variant="contained">
+            Topological Sort
+          </Button>
+          <Button
+            className={classes.layoutButton}
+            variant="contained"
+            color="primary"
+          >
+            Force Layout
+          </Button>
+          <Button
+            className={classes.layoutButton}
+            variant="contained"
+            color="secondary"
+          >
+            Secondary
+          </Button>
+          <Button className={classes.layoutButton} variant="contained">
+            Tree
+          </Button>
         </Toolbar>
       </AppBar>
       <Drawer
@@ -155,6 +177,20 @@ function App() {
                 ))}
             </Select>
           </FormControl>
+          {comboValue === InputType.AdjacencyList && (
+            <FormControlLabel
+              className={classes.formControlLabel}
+              control={
+                <Checkbox
+                  checked={oneIndexed}
+                  onChange={e => setOneIndexed(!oneIndexed)}
+                  name="oneIndexedValue"
+                  color="primary"
+                />
+              }
+              label="1-indexed"
+            />
+          )}
           <FormControlLabel
             className={classes.formControlLabel}
             control={

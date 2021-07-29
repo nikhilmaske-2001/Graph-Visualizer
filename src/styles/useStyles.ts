@@ -61,7 +61,11 @@ export const useStyles = makeStyles(theme => ({
     }),
     marginLeft: 0
   },
-
+  layoutButton: {
+    marginLeft: 10,
+    marginRight: 0
+  },
+  
   // form styles
   formControl: {
     margin: theme.spacing(1),
