@@ -3,27 +3,14 @@ import clsx from "clsx";
 import "./App.css";
 import Graph from "./graph/Graph";
 import * as ParseUtils from "./parser/parseUtils";
-import { InputType, getLabel } from "./parser/inputTypes";
-import { LayoutType, getLayoutLabel } from "./layout/layoutTypes";
+import { InputType, } from "./parser/inputTypes";
+import { LayoutType } from "./layout/layoutTypes";
 import {
-  FormControl,
-  MenuItem,
-  InputLabel,
-  Select,
-  Drawer,
-  Divider,
-  IconButton,
   Typography,
-  TextField,
-  FormControlLabel,
-  Checkbox,
   Slider
 } from "@material-ui/core";
-import { Autocomplete } from "@material-ui/lab";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import { useStyles } from "./styles/useStyles";
-import { ChevronLeft as ChevronLeftIcon } from "@material-ui/icons";
-import { LabelWithTooltip } from "./utils/helperComponents";
 import { TreeNode } from "./layout/treeLayout";
 import Topbar from "./components/Topbar/Topbar";
 
@@ -75,8 +62,6 @@ function App() {
   const [searchInputValue, setSearchInputValue] = React.useState("");
   const [searchText, setSearchText] = React.useState("");
 
-  const graphInputRef = React.useRef<any>();
-  const customNodesInputRef = React.useRef<any>();
   const reverseRef = React.useRef(false);
 
   const [verticalSlider, setVerticalSlider] = React.useState<number>(2);
@@ -161,155 +146,7 @@ function App() {
     <div className={classes.root}>
       <CssBaseline />
       <Topbar />
-      <Drawer
-        className={classes.drawer}
-        variant="persistent"
-        anchor="left"
-        open={drawerOpen}
-        classes={{
-          paper: classes.drawerPaper
-        }}
-      >
-        <div className={classes.drawerHeader}>
-          <Typography className={classes.drawerHeaderText} variant="h6" noWrap>
-            Graph Input
-          </Typography>
-          <IconButton
-            onClick={() => {
-              setDrawerOpen(false);
-            }}
-          >
-            <ChevronLeftIcon />
-          </IconButton>
-        </div>
-        <div>
-          <Divider />
-          <FormControl className={classes.formControl}>
-            <TextField
-              InputLabelProps={{ style: { pointerEvents: "auto" } }}
-              label={
-                <LabelWithTooltip
-                  label={"Graph Input"}
-                  tooltipText={"Enter the text representation of the graph."}
-                  inputRef={graphInputRef}
-                />
-              }
-              inputRef={graphInputRef}
-              placeholder="Please enter graph input."
-              multiline
-              rows={3}
-              rowsMax={10}
-              variant="outlined"
-              value={inputValue}
-              onChange={event => {
-                setInputValue(event.target.value);
-              }}
-              error={graphInputError.length > 0}
-              helperText={graphInputError}
-            />
-          </FormControl>
-          <FormControl className={classes.formControl}>
-            <InputLabel id="graph-input-type-label">Input Type</InputLabel>
-            <Select
-              labelId="graph-input-type-label"
-              id="graph-input-type"
-              value={comboValue}
-              className={classes.selectEmpty}
-              variant="outlined"
-              onChange={e => {
-                setComboValue(parseInt(e.target.value as string));
-              }}
-            >
-              {Object.keys(InputType)
-                .filter(k => typeof InputType[k as any] !== "number")
-                .sort((a, b) => getLabel(parseInt(a)).localeCompare(getLabel(parseInt(b))))
-                .map(key => (
-                  <MenuItem key={key} value={key}>
-                    {getLabel(parseInt(key))}
-                  </MenuItem>
-                ))}
-            </Select>
-          </FormControl>
-          {comboValue === InputType.AdjacencyList && (
-            <FormControlLabel
-              className={classes.formControlLabel}
-              control={
-                <Checkbox
-                  checked={oneIndexed}
-                  onChange={e => setOneIndexed(!oneIndexed)}
-                  name="oneIndexedValue"
-                  color="primary"
-                />
-              }
-              label="1-indexed"
-            />
-          )}
-          {comboValue === InputType.EdgePairs && (
-            <FormControlLabel
-              className={classes.formControlLabel}
-              control={
-                <Checkbox
-                  checked={reverseEdges}
-                  onChange={e => setReverseEdges(!reverseEdges)}
-                  name="reverseValue"
-                  color="primary"
-                />
-              }
-              label="Reverse"
-            />
-          )}
-          <FormControlLabel
-            className={classes.formControlLabel}
-            control={
-              <Checkbox
-                checked={directed}
-                onChange={e => setDirected(!directed)}
-                name="directedValue"
-                color="primary"
-              />
-            }
-            label="Directed"
-          />
-          <FormControl className={classes.formControl}>
-            <Autocomplete
-              options={allNodes}
-              value={startNode && startNode.length > 0 ? startNode : null}
-              onChange={(event: React.ChangeEvent<{}>, newValue: string | null) => {
-                if (newValue) setStartNode(newValue);
-              }}
-              renderInput={(params: any) => (
-                <TextField {...params} label="Start Node" margin="normal" variant="outlined" />
-              )}
-            />
-          </FormControl>
-          <FormControl className={classes.formControl}>
-            <TextField
-              InputLabelProps={{ style: { pointerEvents: "auto" } }}
-              label={
-                <LabelWithTooltip
-                  label={"Custom Node List"}
-                  tooltipText={
-                    "(Optional) Specify if the set of nodes is described in a separate list from the edges."
-                  }
-                  inputRef={customNodesInputRef}
-                />
-              }
-              inputRef={customNodesInputRef}
-              placeholder="Enter custom node set here."
-              multiline
-              rows={3}
-              rowsMax={10}
-              variant="outlined"
-              value={customNodes}
-              onChange={event => {
-                setCustomNodes(event.target.value);
-              }}
-              error={customNodesInputError.length > 0}
-              helperText={customNodesInputError}
-            />
-          </FormControl>
-        </div>
-      </Drawer>
+
       <main
         className={clsx(classes.mainContent, {
           [classes.contentShift]: drawerOpen
