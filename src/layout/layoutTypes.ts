@@ -1,7 +1,6 @@
 import { InputType } from "../parser/inputTypes";
 import { layoutTree } from "./treeLayout";
 import { layoutArc } from "./arcLayout";
-import { layoutTopoSort } from "./topologicalSort";
 import { MyDataType } from "../App";
 
 export enum LayoutType {
@@ -56,8 +55,6 @@ export function performLayout(
   switch (layoutType) {
     case LayoutType.Tree:
       return layoutTree(data, inputType, spacing);
-    case LayoutType.TopologicalSort:
-      return layoutTopoSort(data, spacing);
     case LayoutType.Arc:
       return layoutArc(data, spacing);
     case LayoutType.ForceLayout:
