@@ -40,7 +40,6 @@ function debounce(fn: any, ms: number) {
 const Graph = ({
   inputType,
   data,
-  id = "graph-id",
   directed,
   customNodes,
   startNode,
@@ -51,7 +50,6 @@ const Graph = ({
   verticalSpacing
 }: GraphProps) => {
   const classes = useStyles();
-
 
   const [dimensions, setDimensions] = React.useState({
     height: window.innerHeight,
@@ -77,7 +75,7 @@ const Graph = ({
     for (let node of data.nodes) {
       let nodeId = node.id;
       if (allIds.has(nodeId)) {
-        currIdMap[nodeId] = nodeId + "-1"; // add a 1 if there is a conflict
+        currIdMap[nodeId] = nodeId + "-1"; // add a -1 if there is a conflict
       } else {
         currIdMap[nodeId] = nodeId;
       }
@@ -90,6 +88,7 @@ const Graph = ({
       }
     }
     setOldToNewId(currIdMap);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data, customNodes, selectedLayout, startNode, horizontalSpacing, verticalSpacing]);
 
   if (data.nodes.length === 0) {
