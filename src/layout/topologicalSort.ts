@@ -1,6 +1,6 @@
 import * as LayoutUtils from "./layoutUtils";
 import { MyDataType, MyGraphNodeType, MyGraphLinkType } from "../App";
-import * as Graph from "../graph/Graph";
+import * as Default from "../defaults/Defaults";
 
 
 const DEFAULT_SPACE_BETWEEN_COMPONENTS = 80;
@@ -42,10 +42,10 @@ export function layoutTopoSort(data: MyDataType, spacing: { x: number; y: number
     let curr = roots;
     let baselineY = prevMaxY
       ? prevMaxY + DEFAULT_SPACE_BETWEEN_COMPONENTS
-      : Graph.DEFAULT_TOP_PADDING * 1.2;
+      : Default.TOP_PADDING * 1.2;
     let currMaxY = prevMaxY;
     let y_value = baselineY;
-    let x_value = Graph.DEFAULT_LEFT_PADDING;
+    let x_value = Default.LEFT_PADDING;
 
     let seen = new Set<string>();
     let nodeToLevel: any = {};

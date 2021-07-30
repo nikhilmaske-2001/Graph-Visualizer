@@ -1,6 +1,6 @@
 import { MyDataType } from "../App";
 import * as LayoutUtils from "./layoutUtils";
-import * as Graph from "../graph/Graph";
+import * as Default from "../defaults/Defaults";
 import { InputType } from "../parser/inputTypes";
 
 const DEFAULT_PADDING = 0.4;
@@ -65,8 +65,8 @@ export function layoutTree(data: MyDataType, inputType: number, spacing: { x: nu
     const nodeId = node.id;
     const tNode = idToNode[nodeId];
     if (tNode) {
-      let realx = Graph.DEFAULT_LEFT_PADDING / 2 + spacingArray[spacing.x] * tNode.x;
-      let realy = Graph.DEFAULT_TOP_PADDING + spacingArray[spacing.y] * tNode.y;
+      let realx = Default.LEFT_PADDING / 2 + spacingArray[spacing.x] * tNode.x;
+      let realy = Default.TOP_PADDING + spacingArray[spacing.y] * tNode.y;
       node.x = realx;
       node.y = realy;
     }

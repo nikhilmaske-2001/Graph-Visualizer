@@ -1,6 +1,6 @@
 import * as LayoutUtils from "./layoutUtils";
 import { MyDataType, MyGraphNodeType } from "../App";
-import * as Graph from "../graph/Graph";
+import * as Default from "../defaults/Defaults";
 import { generatePermutations } from "../utils/utils";
 
 
@@ -17,7 +17,7 @@ export function layoutArc(data: MyDataType, spacing: { x: number; y: number }) {
   const directedEdgeMap = LayoutUtils.convertToEdgeMap(links, true);
   const undirectedEdgeMap = LayoutUtils.convertToEdgeMap(links, false);
 
-  let y_value = Graph.DEFAULT_TOP_PADDING + DEFAULT_Y_PADDING / 2;
+  let y_value = Default.TOP_PADDING + DEFAULT_Y_PADDING / 2;
 
   for (let comp of disconnectedComponents) {
     let actualStartNode: string | undefined;
@@ -46,7 +46,7 @@ export function layoutArc(data: MyDataType, spacing: { x: number; y: number }) {
     }
 
     // assign positions to the sorted notes
-    let x_offset = Graph.DEFAULT_LEFT_PADDING / 2;
+    let x_offset = Default.LEFT_PADDING / 2;
     for (let node of sortedNodes) {
       node.x = x_offset;
       node.y = y_value;

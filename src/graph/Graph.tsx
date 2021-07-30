@@ -6,11 +6,8 @@ import * as LayoutUtils from "../layout/layoutUtils";
 import { performLayout, LayoutType } from "../layout/layoutTypes";
 import { Typography } from "@material-ui/core";
 import { useStyles } from "../styles/useStyles";
+import * as Default from "../defaults/Defaults";
 
-export const DEFAULT_LEFT_PADDING = 100;
-export const DEFAULT_RIGHT_PADDING = 180;
-export const DEFAULT_TOP_PADDING = 50;
-export const DEFAULT_EXTRA_NODE_SPACING = 50;
 
 export type GraphProps = {
   inputType: number;
@@ -107,8 +104,8 @@ const Graph = ({
 
   // generate random positions by default (for testing purposes only)
   for (let n of data.nodes) {
-    n.x = Utils.randomInRange(DEFAULT_LEFT_PADDING, graphPaneWidth - DEFAULT_LEFT_PADDING * 1.6);
-    n.y = Utils.randomInRange(DEFAULT_TOP_PADDING, graphPaneHeight - DEFAULT_TOP_PADDING * 1.8);
+    n.x = Utils.randomInRange(Default.LEFT_PADDING, graphPaneWidth - Default.LEFT_PADDING * 1.6);
+    n.y = Utils.randomInRange(Default.TOP_PADDING, graphPaneHeight - Default.TOP_PADDING * 1.8);
   }
 
   // add nodes from customNodes that don't already exist
@@ -128,12 +125,12 @@ const Graph = ({
   }
 
   // calculate positions for extra nodes
-  let x = graphPaneWidth - DEFAULT_RIGHT_PADDING;
-  let y = DEFAULT_TOP_PADDING;
+  let x = graphPaneWidth - Default.RIGHT_PADDING;
+  let y = Default.TOP_PADDING;
   for (let node of extraNodes) {
     node.x = x;
     node.y = y;
-    y += DEFAULT_EXTRA_NODE_SPACING;
+    y += Default.EXTRA_NODE_SPACING;
   }
 
   // run layout on all connectd components
