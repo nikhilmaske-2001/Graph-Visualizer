@@ -32,7 +32,6 @@ import SearchBar from "material-ui-search-bar";
 const DEFAULT_INPUT_TYPE = InputType.AdjacencyList;
 const DEFAULT_LAYOUT_TYPE = LayoutType.Tree;
 const DEFAULT_GRAPH_INPUT = ``;
-const DEFAULT_CUSTOM_NODES_INPUT = "[]";
 
 export type MyGraphNodeType = { id: string; label: string; x?: number; y?: number };
 export type MyGraphLinkType = { source: string; target: string; label?: string };
@@ -180,9 +179,12 @@ function App() {
           >
             <MenuIcon />
           </IconButton>
+
           <Typography variant="h6" noWrap>
             Choose Layout Type:
           </Typography>
+
+          {/* Classify buttons into Selected button(Red color) and Normal buttons(Light Grey color) */}
           {Object.keys(LayoutType)
             .filter(k => typeof LayoutType[k as any] !== "number")
             .map(key => {
@@ -211,6 +213,7 @@ function App() {
                 </ColorButton>
               );
             })}
+
           <div className={classes.searchBar}>
             <SearchBar
               value={searchInputValue}
@@ -226,6 +229,7 @@ function App() {
           </div>
         </Toolbar>
       </AppBar>
+
       <Drawer
         className={classes.drawer}
         variant="persistent"

@@ -32,8 +32,8 @@ export const LabelWithTooltip = ({
     );
 };
 
-const lightGreen = "#81c784";
-const green = "#4caf50";
+const lightred = "#e83838";
+const red = "#e60e0e";
 const lightGrey = "#eeeeee";
 
 export const ColorButton = withStyles(theme => ({
@@ -41,17 +41,17 @@ export const ColorButton = withStyles(theme => ({
         color: theme.palette.getContrastText(lightGrey),
         backgroundColor: lightGrey,
         "&:hover": {
-            backgroundColor: lightGreen
+            backgroundColor: lightred
         }
     }
 }))(Button);
 
 export const SelectedButton = withStyles(theme => ({
     root: {
-        color: theme.palette.getContrastText(green),
-        backgroundColor: green,
+        color: theme.palette.getContrastText(red),
+        backgroundColor: red,
         "&:hover": {
-            backgroundColor: green
+            backgroundColor: red
         }
     }
 }))(Button);
