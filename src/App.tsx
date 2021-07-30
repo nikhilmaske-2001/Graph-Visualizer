@@ -10,9 +10,7 @@ import {
   MenuItem,
   InputLabel,
   Select,
-  AppBar,
   Drawer,
-  Toolbar,
   Divider,
   IconButton,
   Typography,
@@ -24,10 +22,10 @@ import {
 import { Autocomplete } from "@material-ui/lab";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import { useStyles } from "./styles/useStyles";
-import { Menu as MenuIcon, ChevronLeft as ChevronLeftIcon } from "@material-ui/icons";
-import { LabelWithTooltip, ColorButton, SelectedButton } from "./utils/helperComponents";
+import { ChevronLeft as ChevronLeftIcon } from "@material-ui/icons";
+import { LabelWithTooltip } from "./utils/helperComponents";
 import { TreeNode } from "./layout/treeLayout";
-import SearchBar from "material-ui-search-bar";
+import Topbar from "./components/Topbar/Topbar";
 
 const DEFAULT_INPUT_TYPE = InputType.AdjacencyList;
 const DEFAULT_LAYOUT_TYPE = LayoutType.Tree;
@@ -162,70 +160,7 @@ function App() {
   return (
     <div className={classes.root}>
       <CssBaseline />
-      <AppBar
-        position="fixed"
-        className={clsx(classes.appBar, {
-          [classes.appBarShift]: drawerOpen
-        })}
-      >
-        <Toolbar>
-          <IconButton
-            color="inherit"
-            aria-label="open drawer"
-            onClick={() => {
-              setDrawerOpen(true);
-            }}
-            edge="start"
-            className={clsx(classes.menuButton, drawerOpen && classes.hide)}
-          >
-            <MenuIcon />
-          </IconButton>
-          <Typography variant="h6" noWrap>
-            Choose Layout Type:
-          </Typography>
-          {Object.keys(LayoutType)
-            .filter(k => typeof LayoutType[k as any] !== "number")
-            .map(key => {
-              let currLayoutType = parseInt(key);
-              return currLayoutType === selectedLayout ? (
-                <SelectedButton
-                  key={key}
-                  className={classes.layoutButton}
-                  variant="contained"
-                  onClick={() => {
-                    setSelectedLayout(currLayoutType);
-                  }}
-                >
-                  {getLayoutLabel(parseInt(key))}
-                </SelectedButton>
-              ) : (
-                <ColorButton
-                  key={key}
-                  className={classes.layoutButton}
-                  variant="contained"
-                  onClick={() => {
-                    setSelectedLayout(currLayoutType);
-                  }}
-                >
-                  {getLayoutLabel(parseInt(key))}
-                </ColorButton>
-              );
-            })}
-          <div className={classes.searchBar}>
-            <SearchBar
-              value={searchInputValue}
-              onChange={newValue => setSearchInputValue(newValue)}
-              onRequestSearch={() => setSearchText(searchInputValue)}
-              onCancelSearch={() => setSearchText("")}
-              placeholder={"Search Nodes"}
-              style={{
-                width: 200,
-                height: 36
-              }}
-            />
-          </div>
-        </Toolbar>
-      </AppBar>
+      <Topbar />
       <Drawer
         className={classes.drawer}
         variant="persistent"
