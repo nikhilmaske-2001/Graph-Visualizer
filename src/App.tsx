@@ -32,7 +32,6 @@ import SearchBar from "material-ui-search-bar";
 const DEFAULT_INPUT_TYPE = InputType.AdjacencyList;
 const DEFAULT_LAYOUT_TYPE = LayoutType.Tree;
 const DEFAULT_GRAPH_INPUT = ``;
-const DEFAULT_CUSTOM_NODES_INPUT = "[]";
 
 export type MyGraphNodeType = { id: string; label: string; x?: number; y?: number };
 export type MyGraphLinkType = { source: string; target: string; label?: string };

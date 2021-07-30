@@ -207,11 +207,6 @@ export function parseAdjacencyMatrix(config: { input: string }): any {
     const src = srcNode.toString();
     nodeSet.add(src);
 
-    try {
-      const arr = parseArray(input.slice(nextOpenBracket + 1, nextCloseBracket));
-    } catch (ex) {
-      throw ex;
-    }
 
     startInd = nextCloseBracket;
     nextOpenBracket = input.indexOf("[", startInd);

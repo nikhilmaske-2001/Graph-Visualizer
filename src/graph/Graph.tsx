@@ -90,7 +90,7 @@ const Graph = ({
       }
     }
     setOldToNewId(currIdMap);
-  }, [data, customNodes, selectedLayout, startNode, horizontalSpacing, verticalSpacing]);
+  }, [data, customNodes, selectedLayout, startNode, horizontalSpacing, verticalSpacing, oldToNewId]);
 
   if (data.nodes.length === 0) {
     return (
@@ -149,7 +149,6 @@ const Graph = ({
     return (
       <div className={classes.layoutError}>
         <Typography color="error" variant="h6">
-          {layoutResult}
         </Typography>
       </div>
     );
