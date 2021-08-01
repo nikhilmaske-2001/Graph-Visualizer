@@ -6,8 +6,9 @@ import { performLayout, LayoutType } from "../layout/layoutTypes";
 import { Typography } from "@material-ui/core";
 import { useStyles } from "../styles/useStyles";
 import * as Default from "../defaults/Defaults";
+import InputError from "../errors/InputError";
 
-
+// Declare types
 export type GraphProps = {
   inputType: number;
   data: any;
@@ -108,6 +109,8 @@ const Graph = ({
   React.useEffect(() => {
     const allIds = new Set<string>(Object.values(oldToNewId));
     const currIdMap: { [key: string]: string } = {};
+
+    // Traversing Graph Input
     for (let node of data.nodes) {
       let nodeId = node.id;
       if (allIds.has(nodeId)) {
@@ -116,9 +119,11 @@ const Graph = ({
         currIdMap[nodeId] = nodeId;
       }
     }
+
+    // Traversing customNodes Input
     for (let nodeId of Array.from(customNodes)) {
       if (allIds.has(nodeId)) {
-        currIdMap[nodeId] = nodeId + "-1";
+        currIdMap[nodeId] = nodeId + "-1"; // add a -1 if there is a conflict
       } else {
         currIdMap[nodeId] = nodeId;
       }
@@ -127,13 +132,10 @@ const Graph = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data, customNodes, selectedLayout, startNode, horizontalSpacing, verticalSpacing]);
 
+  // Graph Input is empty 
   if (data.nodes.length === 0) {
     return (
-      <div className={classes.layoutError}>
-        <Typography color="secondary" variant="h6">
-          {"<-- Enter a graph input."}
-        </Typography>
-      </div>
+      <InputError />
     );
   }
 
