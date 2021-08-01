@@ -48,12 +48,52 @@ const Graph = ({
 }: GraphProps) => {
   const classes = useStyles();
 
+  // Getting dimensions
   const [dimensions, setDimensions] = React.useState({
     height: window.innerHeight,
     width: window.innerWidth
   });
 
   const [oldToNewId, setOldToNewId] = React.useState<{ [key: string]: string }>({});
+
+  // Getting Dimensions
+  const graphPaneHeight = dimensions.height - 120;
+  const graphPaneWidth = drawerOpen ? dimensions.width - 350 : dimensions.width - 50;
+
+  // Store data arrays
+  const argNodes = [];
+  const argLinks = [];
+
+  // Config
+  const myConfig = {
+    nodeHighlightBehavior: true,
+    staticGraphWithDragAndDrop: selectedLayout !== LayoutType.ForceLayout,
+    width: graphPaneWidth,
+    height: graphPaneHeight,
+    directed: directed,
+    node: {
+      color: "lightgreen",
+      size: 420,
+      labelPosition: "center",
+      labelProperty: "label" as any,
+      fontWeight: "bold",
+      fontSize: 9
+    },
+    link: {
+      color: "blue",
+      renderLabel: getTypeConfig(inputType).weighted,
+      type: selectedLayout === LayoutType.Arc ? "CURVE_SMOOTH" : "STRAIGHT"
+    },
+    d3: {
+      alphaTarget: 0.05,
+      gravity: -180,
+      linkLength: 120,
+      linkStrength: 0.5,
+      disableLinkForce: false
+    },
+    focusZoom: 1
+  };
+
 
   React.useEffect(() => {
     const debouncedHandleResize = debounce(function handleResize() {
@@ -97,10 +137,6 @@ const Graph = ({
       </div>
     );
   }
-
-
-  const graphPaneHeight = dimensions.height - 120;
-  const graphPaneWidth = drawerOpen ? dimensions.width - 350 : dimensions.width - 50;
 
   // generate random positions by default (for testing purposes only)
   for (let n of data.nodes) {
@@ -151,38 +187,7 @@ const Graph = ({
     );
   }
 
-  const myConfig = {
-    nodeHighlightBehavior: true,
-    staticGraphWithDragAndDrop: selectedLayout !== LayoutType.ForceLayout,
-    width: graphPaneWidth,
-    height: graphPaneHeight,
-    directed: directed,
-    node: {
-      color: "lightgreen",
-      size: 420,
-      labelPosition: "center",
-      labelProperty: "label" as any,
-      fontWeight: "bold",
-      fontSize: 9
-    },
-    link: {
-      color: "blue",
-      renderLabel: getTypeConfig(inputType).weighted,
-      type: selectedLayout === LayoutType.Arc ? "CURVE_SMOOTH" : "STRAIGHT"
-    },
-    d3: {
-      alphaTarget: 0.05,
-      gravity: -180,
-      linkLength: 120,
-      linkStrength: 0.5,
-      disableLinkForce: false
-    },
-    focusZoom: 1
-  };
 
-
-  const argNodes = [];
-  const argLinks = [];
   let focusId: string | undefined;
   const seen = new Set<string>();
   for (let node of [...data.nodes, ...extraNodes]) {
@@ -216,8 +221,6 @@ const Graph = ({
       target: oldToNewId[link.target] || link.target
     });
   }
-
-
 
   return (
     <D3Graph
