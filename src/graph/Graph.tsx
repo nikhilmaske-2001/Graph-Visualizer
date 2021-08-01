@@ -181,10 +181,8 @@ const Graph = ({
     }
   }
 
-  let linksToAdd = data.links;
-  if (directed === false) {
-    linksToAdd = LayoutUtils.removeRepeatedEdges(data.links);
-  }
+  // if graph is directed, then remove RepeatedEdges
+  let linksToAdd = directed ? data.links : LayoutUtils.removeRepeatedEdges(data.links);
 
   for (let link of linksToAdd) {
     argLinks.push({
