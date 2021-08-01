@@ -1,7 +1,6 @@
 import React from "react";
 import { Graph as D3Graph } from "react-d3-graph";
 import { getTypeConfig } from "../parser/inputTypes";
-import * as Utils from "../utils/utils";
 import * as LayoutUtils from "../layout/layoutUtils";
 import { performLayout, LayoutType } from "../layout/layoutTypes";
 import { Typography } from "@material-ui/core";
@@ -136,12 +135,6 @@ const Graph = ({
         </Typography>
       </div>
     );
-  }
-
-  // generate random positions by default (for testing purposes only)
-  for (let n of data.nodes) {
-    n.x = Utils.randomInRange(Default.LEFT_PADDING, graphPaneWidth - Default.LEFT_PADDING * 1.6);
-    n.y = Utils.randomInRange(Default.TOP_PADDING, graphPaneHeight - Default.TOP_PADDING * 1.8);
   }
 
   // add nodes from customNodes that don't already exist
