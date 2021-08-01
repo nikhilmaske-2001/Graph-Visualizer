@@ -6,6 +6,7 @@ import { performLayout, LayoutType } from "../layout/layoutTypes";
 import { Typography } from "@material-ui/core";
 import { useStyles } from "../styles/useStyles";
 import * as Default from "../defaults/Defaults";
+import * as utils from "../utils/utils";
 import InputError from "../errors/InputError";
 
 // Declare types
@@ -22,17 +23,6 @@ export type GraphProps = {
   horizontalSpacing: number;
   verticalSpacing: number;
 };
-
-function debounce(fn: any, ms: number) {
-  let timer: any;
-  return (_: any) => {
-    clearTimeout(timer);
-    timer = setTimeout(_ => {
-      timer = null;
-      fn();
-    }, ms);
-  };
-}
 
 const Graph = ({
   inputType,
@@ -96,7 +86,7 @@ const Graph = ({
 
 
   React.useEffect(() => {
-    const debouncedHandleResize = debounce(function handleResize() {
+    const debouncedHandleResize = utils.debounce(function handleResize() {
       setDimensions({
         height: window.innerHeight,
         width: window.innerWidth
