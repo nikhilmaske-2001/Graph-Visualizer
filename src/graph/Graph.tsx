@@ -1,14 +1,15 @@
 import React from "react";
+import InputError from "../errors/InputError";
 import { Graph as D3Graph } from "react-d3-graph";
 import { getTypeConfig } from "../parser/inputTypes";
-import * as LayoutUtils from "../layout/layoutUtils";
 import { performLayout, LayoutType } from "../layout/layoutTypes";
 import { Typography } from "@material-ui/core";
 import { useStyles } from "../styles/useStyles";
 import * as Default from "../defaults/Defaults";
 import * as utils from "../utils/utils";
 import * as types from "../parser/inputTypes";
-import InputError from "../errors/InputError";
+import * as LayoutUtils from "../layout/layoutUtils";
+
 
 
 const Graph = ({
