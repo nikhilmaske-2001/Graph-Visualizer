@@ -8,6 +8,21 @@ export enum InputType {
     BinaryHeap,
     LeetcodeTree
   }
+
+// Declare types
+export type GraphProps = {
+  inputType: number;
+  data: any;
+  id: string;
+  directed: boolean;
+  customNodes: Set<string>;
+  startNode: string | null;
+  selectedLayout: number;
+  drawerOpen: boolean;
+  searchText: string;
+  horizontalSpacing: number;
+  verticalSpacing: number;
+};
   
   export function getLabel(type: number) {
     switch (type) {

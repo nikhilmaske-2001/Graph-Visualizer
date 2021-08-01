@@ -7,22 +7,9 @@ import { Typography } from "@material-ui/core";
 import { useStyles } from "../styles/useStyles";
 import * as Default from "../defaults/Defaults";
 import * as utils from "../utils/utils";
+import * as types from "../parser/inputTypes";
 import InputError from "../errors/InputError";
 
-// Declare types
-export type GraphProps = {
-  inputType: number;
-  data: any;
-  id: string;
-  directed: boolean;
-  customNodes: Set<string>;
-  startNode: string | null;
-  selectedLayout: number;
-  drawerOpen: boolean;
-  searchText: string;
-  horizontalSpacing: number;
-  verticalSpacing: number;
-};
 
 const Graph = ({
   inputType,
@@ -35,7 +22,7 @@ const Graph = ({
   searchText,
   horizontalSpacing,
   verticalSpacing
-}: GraphProps) => {
+}: types.GraphProps) => {
   const classes = useStyles();
 
   // Getting dimensions
