@@ -154,7 +154,7 @@ const Graph = ({
     return (
       <div className={classes.layoutError}>
         <Typography color="error" variant="h6">
-          {layoutResult}
+          {/* {layoutResult} */}
         </Typography>
       </div>
     );

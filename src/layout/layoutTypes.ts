@@ -1,13 +1,13 @@
 import { InputType } from "../parser/inputTypes";
 import { layoutTree } from "./treeLayout";
 import { layoutArc } from "./arcLayout";
-import { layoutTopoSort } from "./topologicalSort";
+// import { layoutTopoSort } from "./topologicalSort";
 import { MyDataType } from "../App";
 
 export enum LayoutType {
   Tree,
   ForceLayout,
-  TopologicalSort,
+  // TopologicalSort,
   Arc,
   Random
 }
@@ -18,8 +18,8 @@ export function getLayoutLabel(type: number) {
       return "Tree";
     case LayoutType.ForceLayout:
       return "Force-Directed";
-    case LayoutType.TopologicalSort:
-      return "Topological Sort";
+    // case LayoutType.TopologicalSort:
+    //   return "Topological Sort";
     case LayoutType.Arc:
       return "Arc";
     case LayoutType.Random:
@@ -43,7 +43,8 @@ export function getDefaultLayout({ inputType, data, directed, customNodes, start
     case InputType.LeetcodeTree:
       return LayoutType.Tree;
     default:
-      return LayoutType.TopologicalSort;
+      return LayoutType.Tree;
+      // return LayoutType.TopologicalSort;
   }
 }
 
@@ -56,8 +57,8 @@ export function performLayout(
   switch (layoutType) {
     case LayoutType.Tree:
       return layoutTree(data, inputType, spacing);
-    case LayoutType.TopologicalSort:
-      return layoutTopoSort(data, spacing);
+    // case LayoutType.TopologicalSort:
+      // return layoutTopoSort(data, spacing);
     case LayoutType.Arc:
       return layoutArc(data, spacing);
     case LayoutType.ForceLayout:
