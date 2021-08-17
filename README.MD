@@ -135,7 +135,7 @@ To clone and run this application in your machine, you'll need [Git](https://git
 
 ```bash
 # Clone this repository.
-git clone https://github.com/jy-whatthetech/visualization.git
+git clone https://github.com/nikhilmaske-2001/Graph-Visualizer
 cd visualization
 
 # Install dependencies
