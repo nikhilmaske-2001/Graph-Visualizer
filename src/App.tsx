@@ -29,10 +29,6 @@ import { LabelWithTooltip, ColorButton, SelectedButton } from "./utils/helperCom
 import { TreeNode } from "./layout/treeLayout";
 import SearchBar from "material-ui-search-bar";
 
-const DEFAULT_INPUT_TYPE = InputType.AdjacencyList;
-const DEFAULT_LAYOUT_TYPE = LayoutType.Tree;
-const DEFAULT_GRAPH_INPUT = ``;
-
 export type MyGraphNodeType = { id: string; label: string; x?: number; y?: number };
 export type MyGraphLinkType = { source: string; target: string; label?: string };
 export type MyDataType = {
@@ -46,16 +42,16 @@ export type MyDataType = {
 
 function App() {
   const classes = useStyles();
-  // layout
+  // set the drawer open
   const [drawerOpen, setDrawerOpen] = React.useState(true);
 
-  // input data
-  const [inputValue, setInputValue] = React.useState(DEFAULT_GRAPH_INPUT);
-  const [comboValue, setComboValue] = React.useState(DEFAULT_INPUT_TYPE);
+  // set the default values
+  const [inputValue, setInputValue] = React.useState('');
+  const [comboValue, setComboValue] = React.useState(InputType.AdjacencyList);
   const [directed, setDirected] = React.useState(true);
   const [oneIndexed, setOneIndexed] = React.useState(false); // used for adjacency lists
   const [reverseEdges, setReverseEdges] = React.useState(false); // used for edge pairs
-  const [customNodes, setCustomNodes] = React.useState(DEFAULT_GRAPH_INPUT);
+  const [customNodes, setCustomNodes] = React.useState('');
 
   const [allNodes, setAllNodes] = React.useState<Array<string>>([]);
   const [startNode, setStartNode] = React.useState<string | null>(null);
@@ -72,7 +68,7 @@ function App() {
   });
 
   // layout
-  const [selectedLayout, setSelectedLayout] = React.useState(DEFAULT_LAYOUT_TYPE);
+  const [selectedLayout, setSelectedLayout] = React.useState(LayoutType.Tree);
   const [searchInputValue, setSearchInputValue] = React.useState("");
   const [searchText, setSearchText] = React.useState("");
 
