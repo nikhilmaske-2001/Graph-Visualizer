@@ -182,30 +182,30 @@ function App() {
 
           {/* Classify buttons into Selected button(Red color) and Normal buttons(Light Grey color) */}
           {Object.keys(LayoutType)
-            .filter(k => typeof LayoutType[k as any] !== "number")
-            .map(key => {
-              let currLayoutType = parseInt(key);
-              return currLayoutType === selectedLayout ? (
+            .filter(layout => typeof LayoutType[layout as any] !== "number")
+            .map(layout => {
+              let currentLayoutType = parseInt(layout);
+              return currentLayoutType === selectedLayout ? (
                 <SelectedButton
-                  key={key}
+                  key={layout}
                   className={classes.layoutButton}
                   variant="contained"
                   onClick={() => {
-                    setSelectedLayout(currLayoutType);
+                    setSelectedLayout(currentLayoutType);
                   }}
                 >
-                  {getLayoutLabel(parseInt(key))}
+                  {getLayoutLabel(parseInt(layout))}
                 </SelectedButton>
               ) : (
                 <ColorButton
-                  key={key}
+                  key={layout}
                   className={classes.layoutButton}
                   variant="contained"
                   onClick={() => {
-                    setSelectedLayout(currLayoutType);
+                    setSelectedLayout(currentLayoutType);
                   }}
                 >
-                  {getLayoutLabel(parseInt(key))}
+                  {getLayoutLabel(parseInt(layout))}
                 </ColorButton>
               );
             })}
