@@ -1,7 +1,7 @@
 import React from "react";
 import clsx from "clsx";
 import "./App.css";
-import Graph from "./graph/Graph";
+import Graph from "./components/Graph";
 import * as ParseUtils from "./parser/parseUtils";
 import { InputType, getLabel } from "./parser/inputTypes";
 import { LayoutType, getLayoutLabel } from "./layout/layoutTypes";
@@ -375,6 +375,7 @@ function App() {
           </FormControl>
         </div>
       </Drawer>
+
       <main
         className={clsx(classes.mainContent, {
           [classes.contentShift]: drawerOpen
