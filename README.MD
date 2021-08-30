@@ -5,6 +5,8 @@
 <h4 align="center">
   Convert graphs and trees from their text-based representation into intuitive visual layouts.
 </h4>
+<img src="GV1.png" alt="GV1" border="0">
+<img src="GV2.png" alt="GV2" border="0">
 
 ## :exclamation: About
 
